@@ -17,15 +17,15 @@ def create_directory_for_dataset(dataset_directory):
         print("Directory ", dataset_directory, " already exists")
 
 
-def split_images(reports_images, img_keys, filename, reports_text=None):
+def split_images(reports_images, img_keys, filename, text_of_reports=None):
     new_images = {}
-    if reports_text is None:
+    if text_of_reports is None:
         for key in img_keys:
             new_images[key] = reports_images[key]
     else:
         for key in img_keys:
             for img in reports_images[key]:
-                new_images[img] = reports_text[key]
+                new_images[img] = text_of_reports[key]
     with open(filename, "w") as news_images_file:
         for new_image in new_images:
             news_images_file.write(new_image + "\t" + new_images[new_image])
@@ -75,9 +75,8 @@ def download_dataset(dataset):
         os.system("tar -xzf ./iu_xray/NLMCXR_png.tgz -C iu_xray/iu_xray_images/")
         os.system("tar -xzf ./iu_xray/NLMCXR_reports.tgz -C iu_xray/")
     elif dataset is 'peir_gross':
-        crawl_peir_gross()
+        return crawl_peir_gross()
     else:
-        # download clef
         pass
 
 
@@ -130,7 +129,7 @@ def crawl_peir_gross():
             # get the images from all the pages
             while True:
                 # find the links to the images of the current page
-                thumbnails = page_soup.find("ul", class_="thumbnails").find_all("a")
+                thumbnails = page_parser.find("ul", class_="thumbnails").find_all("a")
 
                 for thumbnail in thumbnails:
                     # get the image url
