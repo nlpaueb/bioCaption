@@ -1,83 +1,14 @@
 import os
-import json
-import random
-import numpy as np
 import xml.etree.ElementTree as ET
-from os.path import join as path_join, abspath
-
-
-def _create_directory_for_dataset(dataset_directory='iu_xray'):
-    try:
-        # Create target Directory
-        os.mkdir(dataset_directory)
-        os.makedirs(abspath(path_join(dataset_directory, dataset_directory+"_images")))
-        print("Directory ", dataset_directory, " Created ")
-    except FileExistsError:
-        print("Directory ", dataset_directory, " already exists")
-
-
-def _download_dataset(dataset='iu_xray'):
-    if dataset is 'iu_xray':
-        os.system("wget -P iu_xray/ https://openi.nlm.nih.gov/imgs/collections/NLMCXR_png.tgz")
-        # download reports
-        os.system("wget -P iu_xray/ https://openi.nlm.nih.gov/imgs/collections/NLMCXR_reports.tgz")
-        # unzip
-        os.system("tar -xzf ./iu_xray/NLMCXR_png.tgz -C iu_xray/iu_xray_images/")
-        os.system("tar -xzf ./iu_xray/NLMCXR_reports.tgz -C iu_xray/")
-    elif dataset is 'peir_gross':
-        pass
-    else:
-        #download clef
-        pass
-
-
-def _split_images(reports_images, reports_text, img_keys, filename):
-    new_images = {}
-    for key in img_keys:
-        for img in reports_images[key]:
-            new_images[img] = reports_text[key]
-    with open(filename, "w") as news_images_file:
-        for new_image in new_images:
-            news_images_file.write(new_image + "\t" + new_images[new_image])
-            news_images_file.write("\n")
-
-
-def _write_dataset(images_captions, images_major_tags, images_auto_tags, dataset='iu_xray'):
-    with open(dataset+"/"+dataset+".tsv", "w") as output_file:
-        for image_caption in images_captions:
-            output_file.write(image_caption + "\t" + images_captions[image_caption])
-            output_file.write("\n")
-
-    # Safer JSON storing
-    with open(dataset+"/"+dataset+"+_captions.json", "w") as output_file:
-        output_file.write(json.dumps(images_captions))
-    with open(dataset+"/"+dataset+".json", "w") as output_file:
-        output_file.write(json.dumps(images_major_tags))
-    with open(dataset+"/"+dataset+"_auto_tags.json", "w") as output_file:
-        output_file.write(json.dumps(images_auto_tags))
-
-
-def _split_dataset(reports_with_images, text_of_reports):
-    # perform a case based split
-    random.seed(42)
-    keys = list(reports_with_images.keys())
-    random.shuffle(keys)
-
-    train_split = int(np.floor(len(reports_with_images) * 0.9))
-
-    train_keys = keys[:train_split]
-    test_keys = keys[train_split:]
-
-    train_path = "iu_xray/train_images.tsv"
-    test_path = "iu_xray/test_images.tsv"
-
-    _split_images(reports_with_images, text_of_reports, train_keys, train_path)
-    _split_images(reports_with_images, text_of_reports, test_keys, test_path)
+from dc.download.download_utils import write_dataset, download_dataset, \
+    create_directory_for_dataset, split_dataset
 
 
 def download_iu_xray():
-    #_create_directory_for_dataset()
-    #_download_dataset()
+    dataset_name = 'iu_xray'
+
+    create_directory_for_dataset(dataset_name)
+    download_dataset(dataset_name)
 
     images_captions = {}
     images_major_tags = {}
@@ -124,9 +55,16 @@ def download_iu_xray():
 
                 reports_with_images[report] = img_ids
                 text_of_reports[report] = caption
-        _write_dataset(images_captions, images_major_tags, images_auto_tags, dataset='iu_xray')
-        _split_dataset(reports_with_images, text_of_reports)
+        write_dataset(dataset_name, images_captions, images_major_tags, images_auto_tags=images_auto_tags)
+        split_dataset(reports_with_images,dataset_name ,text_of_reports)
 
+
+def download_peir_gross():
+    dataset_name = 'peir_gross'
+    create_directory_for_dataset(dataset_name)
+    image_captions, image_tags = download_dataset(dataset_name)
+    write_dataset(dataset_name, image_captions, image_tags)
+    split_dataset(image_captions, dataset_name)
 
 download_iu_xray()
 
