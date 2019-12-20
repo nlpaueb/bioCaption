@@ -1,0 +1,6 @@
+gensim
+pandas
+numpy
+requests
+tqdm
+img2vec
