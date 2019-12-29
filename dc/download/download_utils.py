@@ -3,8 +3,8 @@ import json
 import random
 import requests
 import numpy as np
-from bs4 import BeautifulSoup
 from os.path import join as path_join, abspath
+from bs4 import BeautifulSoup
 
 
 def create_directory_for_dataset(dataset_directory):

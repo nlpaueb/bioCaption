@@ -72,4 +72,4 @@ def download_imageCLEF():
 
 
 
-
+download_iu_xray()
