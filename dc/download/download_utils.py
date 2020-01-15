@@ -6,15 +6,21 @@ import numpy as np
 from os.path import join as path_join, abspath
 from bs4 import BeautifulSoup
 
+PATH = os.getcwd()
 
-def create_directory_for_dataset(dataset_directory):
+
+def create_directory_for_dataset(dataset_folder_name):
+    """ Creates directory for a dataset if it does not exist.
+    :param dataset_folder_name: Creates a folder with name
+    'dataset_folder_name' in the current working directory.
+    """
     try:
         # Create target Directory
-        os.mkdir(dataset_directory)
-        os.makedirs(abspath(path_join(dataset_directory, dataset_directory + "_images")))
-        print("Directory ", dataset_directory, " Created ")
+        path = abspath(path_join(PATH, dataset_folder_name, dataset_folder_name+"_images"))
+        os.makedirs(path)
+        print("Directory ", dataset_folder_name, " Created ")
     except FileExistsError:
-        print("Directory ", dataset_directory, " already exists")
+        print("Directory ", dataset_folder_name, " already exists")
 
 
 def split_images(reports_images, img_keys, filename, text_of_reports=None):
@@ -32,35 +38,52 @@ def split_images(reports_images, img_keys, filename, text_of_reports=None):
             news_images_file.write("\n")
 
 
-def write_dataset(dataset, images_captions, images_tags, images_auto_tags=None):
-    with open(dataset + "/" + dataset + ".tsv", "w") as output_file:
+def write_dataset(dataset_folder_name, images_captions, images_tags, images_auto_tags=None):
+    """ Writes the dataset in the currect working directory in a folder
+    with name ''dataset_folder_name'
+    :param dataset: dataset_folder_name
+    :param images_captions: list with imgage captions
+    :param images_tags: list with images_tags
+    :param images_auto_tags: list with auto_tags
+    :return:
+    """
+    write_path = abspath(path_join(PATH, dataset_folder_name))
+    with open(abspath(path_join(write_path, dataset_folder_name+'.tsv')), "w") as output_file:
         for image_caption in images_captions:
             output_file.write(image_caption + "\t" + images_captions[image_caption])
             output_file.write("\n")
 
     # Safer JSON storing
-    with open(dataset + "/" + dataset + "+_captions.json", "w") as output_file:
+    with open(abspath(path_join(write_path, dataset_folder_name+'_captions.json')), "w") as output_file:
         output_file.write(json.dumps(images_captions))
-    with open(dataset + "/" + dataset + ".json", "w") as output_file:
+    with open(dataset_folder_name + "/" + dataset_folder_name + ".json", "w") as output_file:
         output_file.write(json.dumps(images_tags))
     if images_auto_tags is not None:
-        with open(dataset + "/" + dataset + "_auto_tags.json", "w") as output_file:
+        with open(abspath(path_join(write_path, dataset_folder_name+'_auto_tags.jsonn')), "w") as output_file:
             output_file.write(json.dumps(images_auto_tags))
 
 
-def split_dataset(data, dataset_name, text_of_reports=None):
+def split_dataset(data, dataset_name_folder, split_rate, text_of_reports=None):
+    """Splits the dataset into training and set.
+    :param data: list of data.
+    :param dataset_name_folder: name of the folder where the dataset is stored.
+    :param split_rate: float number in (0,1). Defines the rate of data to be kept
+    for training.
+    :param text_of_reports: list with text of reports if they exist.
+    :return:
+    """
     # perform a case based split
     random.seed(42)
     keys = list(data.keys())
     random.shuffle(keys)
 
-    train_split = int(np.floor(len(data) * 0.9))
+    train_split = int(np.floor(len(data) * split_rate))
 
     train_keys = keys[:train_split]
     test_keys = keys[train_split:]
-
-    train_path = dataset_name + "/train_images.tsv"
-    test_path = dataset_name + "/test_images.tsv"
+    abspath(path_join(PATH, dataset_name_folder,'train_images.tsv'))
+    train_path = abspath(path_join(PATH, dataset_name_folder, 'train_images.tsv'))
+    test_path = abspath(path_join(PATH, dataset_name_folder, 'test_images.tsv'))
 
     split_images(data, train_keys, train_path, text_of_reports=text_of_reports)
     split_images(data, test_keys, test_path, text_of_reports=text_of_reports)
@@ -81,6 +104,9 @@ def download_dataset(dataset):
 
 
 def crawl_peir_gross():
+    """Crawls "http://peir.path.uab.edu/library" and
+    created the peir_gross dataset.
+    """
     image_captions = {}
     image_tags = {}
 

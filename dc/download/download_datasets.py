@@ -4,7 +4,12 @@ from dc.download.download_utils import write_dataset, download_dataset, \
     create_directory_for_dataset, split_dataset
 
 
-def download_iu_xray():
+def download_iu_xray(split_rate=0.9):
+    """Downloads the iu_xray dataset
+    :param split_rate: Percentage of the dataset to be kept as training.
+    :return: Writes a folder with the dataset name, in the current working
+    directory with the dataset.
+    """
     dataset_name = 'iu_xray'
 
     create_directory_for_dataset(dataset_name)
@@ -56,15 +61,20 @@ def download_iu_xray():
                 reports_with_images[report] = img_ids
                 text_of_reports[report] = caption
         write_dataset(dataset_name, images_captions, images_major_tags, images_auto_tags=images_auto_tags)
-        split_dataset(reports_with_images,dataset_name ,text_of_reports)
+        split_dataset(reports_with_images,dataset_name, split_rate, text_of_reports)
 
 
-def download_peir_gross():
+def download_peir_gross(split_rate=0.9):
+    """Downloads the peir_gross dataset
+    :param split_rate: Percentage of the dataset to be kept as training.
+    :return: Writes a folder with the dataset name, in the current working
+    directory with the dataset.
+    """
     dataset_name = 'peir_gross'
     create_directory_for_dataset(dataset_name)
     image_captions, image_tags = download_dataset(dataset_name)
     write_dataset(dataset_name, image_captions, image_tags)
-    split_dataset(image_captions, dataset_name)
+    split_dataset(image_captions, dataset_name, split_rate)
 
 
 def download_imageCLEF():
@@ -72,4 +82,4 @@ def download_imageCLEF():
 
 
 
-download_iu_xray()
+download_iu_xray(split_rate=0.5)
