@@ -12,7 +12,7 @@ sys.path.append("..")  # Adds higher directory to python modules path.
 
 
 class Baselines:
-    def __init__(self, train_dir, test_dir, images_dir,results_dir):
+    def __init__(self, train_dir, test_dir, images_dir, results_dir):
         """
         :param train_dir: The directory to the train data tsv file with the form: "image \t caption"
         :param test_dir: The directory to the test data tsv file with the form: "image \t caption"
