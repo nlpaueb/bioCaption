@@ -1,5 +1,5 @@
 import os
-import xml.etree.ElementTree as ET
+import xml.etree.ElementTree as ElementTree
 from dc.download.download_utils import write_dataset, download_dataset, \
     create_directory_for_dataset, split_dataset
 
@@ -20,7 +20,7 @@ def download_iu_xray():
     reports = os.listdir(reports_path)
     reports.sort()
     for report in reports:
-        tree = ET.parse(os.path.join(reports_path, report))
+        tree = ElementTree.parse(os.path.join(reports_path, report))
         root = tree.getroot()
         img_ids = []
         # find the images of the report
