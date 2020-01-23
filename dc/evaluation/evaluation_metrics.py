@@ -1,5 +1,4 @@
 import re
-import argparse
 import gensim
 import pandas as pd
 from pycocoevalcap.bleu.bleu import Bleu

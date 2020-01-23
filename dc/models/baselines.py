@@ -26,9 +26,9 @@ class Baselines:
         self.results_dir = results_dir
 
     # Clean for BioASQ
-    def bioclean(self, t):
+    def _bioclean(self, token):
         return re.sub('[.,?;*!%^&_+():-\[\]{}]', '',
-                      t.replace('"', '').replace('/', '').replace('\\', '')
+                      token.replace('"', '').replace('/', '').replace('\\', '')
                       .replace("'", '').strip().lower()).split()
 
     def most_frequent_word_in_captions(self, length):
@@ -47,7 +47,7 @@ class Baselines:
         with open(self.train_dir, "r") as file:
             for line in file:
                 line = line.replace("\n", "").split("\t")
-                tokens = self.bioclean(line[1])
+                tokens = self._bioclean(line[1])
                 for token in tokens:
                     words.append(token)
 
