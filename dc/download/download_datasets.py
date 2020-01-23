@@ -76,10 +76,3 @@ def download_peir_gross(split_rate=0.9):
     write_dataset(dataset_name, image_captions, image_tags)
     split_dataset(image_captions, dataset_name, split_rate)
 
-
-def download_imageCLEF():
-    dataset_name = 'imageClef'
-
-
-
-download_iu_xray(split_rate=0.5)

@@ -24,10 +24,12 @@ class Evaluation:
         self.result_data = {}
 
     def load_data(self):
-        gold_csv = pd.read_csv(self.gold_dir, sep="\t", header=None, names=["image_ids", "captions"])
+        gold_csv = pd.read_csv(self.gold_dir, sep="\t", header=None, names=["image_ids", "captions"],
+                               encoding='utf-8', engine='python')
         self.gold_data = dict(zip(gold_csv.image_ids, gold_csv.captions))
 
-        results_csv = pd.read_csv(self.results_dir, sep="\t", header=None, names=["image_ids", "captions"])
+        results_csv = pd.read_csv(self.results_dir, sep="\t", header=None, names=["image_ids", "captions"],
+                                  encoding='utf-8', engine='python')
         self.result_data = dict(zip(results_csv.image_ids, results_csv.captions))
 
     def preprocess_captions(self, images_captions):
