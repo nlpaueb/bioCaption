@@ -12,7 +12,7 @@ logger = get_logger()
 def _bioclean(token):
     return re.sub('[.,?;*!%^&_+():-\[\]{}]', '',
                   token.replace('"', '').replace('/', '').replace('\\', '')
-                  .replace("'", '').strip().lower()).split()
+                  .replace("'", '').strip().lower())
 
 
 class Evaluation:
@@ -32,15 +32,16 @@ class Evaluation:
                                   encoding='utf-8', engine='python')
         self.result_data = dict(zip(results_csv.image_ids, results_csv.captions))
 
-    def preprocess_captions(self, images_captions):
+    def preprocess_captions(self, images_caption_dict):
         """
-        :param images_captions: Dictionary with image ids as keys and captions as values
-        :return: Dictionary with the processed captions as values
+        :param images_caption_dict: Dictionary with image ids as keys and captions as values
+        :return: Dictionary with the processed captions as values and the id of the images as
+        key
         """
-        processed_captions = {}
-        for image in images_captions:
-            processed_captions[image] = _bioclean(images_captions[image])
-        return processed_captions
+        processed_captions_dict = {}
+        for image_id in images_caption_dict:
+            processed_captions_dict[image_id] = [_bioclean(images_caption_dict[image_id])]
+        return processed_captions_dict
 
     def compute_WMD(self, bio_path):
         """Word Mover's Distance computes the minimum cumulative cost required to move all word embeddings of one caption
@@ -74,7 +75,8 @@ class Evaluation:
 
         if len(self.gold_data) == len(self.result_data):
             for image in self.gold_data:
-                distance = bio.wmdistance(self.gold_data[image].split(), self.result_data[image].split())
+                print(self.gold_data[image])
+                distance = bio.wmdistance(self.gold_data[image][0].split(), self.result_data[image][0].split())
                 similarities[image] = (1. / (1. + distance))
                 total_distance = total_distance + distance
                 img_wmds[image] = distance

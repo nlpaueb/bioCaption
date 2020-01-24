@@ -52,6 +52,7 @@ class Baselines:
                     words.append(token)
 
         print("The number of total words is:", len(words))
+        print("The number of total words is:", len(words))
 
         # Find the (mean caption length) most frequent words
         frequent_words = Counter(words).most_common(int(round(length)))
