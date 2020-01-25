@@ -13,6 +13,7 @@ class DownloadDatasets:
     def __init__(self, dataset_path=os.getcwd()):
         self.dataset_path = dataset_path
 
+
     def download_iu_xray(self, split_rate=0.9):
         """Downloads the iu_xray dataset
         :param split_rate: Percentage of the dataset to be kept as training.
@@ -96,6 +97,12 @@ class DownloadDatasets:
             print("Directory ", dataset_folder_name, " Created ")
         except FileExistsError:
             print("Directory ", dataset_folder_name, " already exists")
+
+    def download_bio_embeddings(self):
+        os.system("wget https://archive.org/download/pubmed2018_w2v_200D.tar/pubmed2018_w2v_200D.tar.gz")
+        #Unzip word embeddings
+        os.system("tar xvzf pubmed2018_w2v_200D.tar.gz")
+        os.system("rm  pubmed2018_w2v_200D.tar.gz")
 
     def split_images(self, reports_images, img_keys, filename, text_of_reports=None):
         new_images = {}
