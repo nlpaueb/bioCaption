@@ -1,22 +1,26 @@
-import setuptools
+from setuptools import setup, find_packages
+from os import path
+from io import open
 
-with open("README.md", "r") as fh:
-    long_description = fh.read()
+here = path.abspath(path.dirname(__file__))
 
-setuptools.setup(
-    name="dc-nlpaueb",
-    version="0.0.1",
-    author="Vasiliki Kougia, Maria Georgiou, Ioannis Pavlopoulos",
-    author_email="author@example.com",
-    description="Diagnostic captioning.",
-    long_description=long_description,
-    long_description_content_type="text/markdown",
-    url="https://github.com/nlpaueb/dc",
-    packages=setuptools.find_packages(),
-    classifiers=[
-        "Programming Language :: Python :: 3",
-        "License :: OSI Approved :: MIT License",
-        "Operating System :: OS Independent",
-    ],
-    python_requires='>=3.6',
+# Get the long description from the README file
+with open(path.join(here, 'README.md'), encoding='utf-8') as f:
+    long_description = f.read()
+setup(
+      name='dc',  # Required
+      version='0.1',
+      description='Diagnostic Captioning',
+      url='https://github.com/nlpaueb/dc',
+      author='nlpaueb',
+      classifiers=[
+            'Development Status :: 3 - Alpha',
+            'License :: OSI Approved :: MIT License',
+            'Programming Language :: Python :: 3.7'
+      ],
+      keywords='diagnostic image captioning machine learning',
+      package_dir={'': 'dc'},
+      packages=find_packages(where='dc'),  # Required
+      python_requires='>=2.7',
+      install_requires=['bs4'],
 )
