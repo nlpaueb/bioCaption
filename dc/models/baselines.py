@@ -24,6 +24,8 @@ class Baselines:
         self.test_dir = test_dir
         self.images_dir = images_dir
         self.results_dir = results_dir
+        if not os.path.exists(self.results_dir):
+            os.makedirs(self.results_dir)
 
     # Clean for BioASQ
     def _bioclean(self, token):
@@ -31,7 +33,7 @@ class Baselines:
                       token.replace('"', '').replace('/', '').replace('\\', '')
                       .replace("'", '').strip().lower()).split()
 
-    def most_frequent_word_in_captions(self, length):
+    def most_frequent_word_in_captions(self, length=5):
         """
         Frequency baseline: uses the frequency of words in the training captions to always generate the same caption.
         The most frequent word always becomes the first word of the caption, the next most frequent word always
