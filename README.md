@@ -1,5 +1,4 @@
 # DC - Diagnostic Captioning
-===========================
 Based on [A Survey on Biomedical Image Captioning](https://www.aclweb.org/anthology/W19-1803).
 
 > V. Kougia, J. Pavlopoulos and I Androutsopoulos, "A Survey on Biomedical Image Captioning". 
