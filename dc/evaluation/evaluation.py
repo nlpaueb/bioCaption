@@ -4,9 +4,9 @@ import pandas as pd
 from pycocoevalcap.bleu.bleu import Bleu
 from pycocoevalcap.meteor.meteor import Meteor
 from pycocoevalcap.rouge.rouge import Rouge
-from dc.configuration import get_logger
+from dc.configuration import _get_logger
 
-logger = get_logger()
+logger = _get_logger()
 
 
 def _bioclean(token):
@@ -23,7 +23,7 @@ class Evaluation:
         self.gold_data = {}
         self.result_data = {}
 
-    def load_data(self):
+    def _load_data(self):
         gold_csv = pd.read_csv(self.gold_dir, sep="\t", header=None, names=["image_ids", "captions"],
                                encoding='utf-8', engine='python')
         self.gold_data = dict(zip(gold_csv.image_ids, gold_csv.captions))
@@ -32,7 +32,7 @@ class Evaluation:
                                   encoding='utf-8', engine='python')
         self.result_data = dict(zip(results_csv.image_ids, results_csv.captions))
 
-    def preprocess_captions(self, images_caption_dict):
+    def _preprocess_captions(self, images_caption_dict):
         """
         :param images_caption_dict: Dictionary with image ids as keys and captions as values
         :return: Dictionary with the processed captions as values and the id of the images as

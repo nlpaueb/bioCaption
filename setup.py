@@ -19,8 +19,7 @@ setup(
             'Programming Language :: Python :: 3.7'
       ],
       keywords='diagnostic image captioning machine learning',
-      package_dir={'': 'dc'},
-      packages=find_packages(where='dc'),  # Required
+      packages=find_packages(),
       python_requires='>=2.7',
-      install_requires=['bs4'],
+      install_requires=['bs4', 'pandas', 'img2vec_pytorch', 'gensim', 'Cython', 'pycocoevalcap'],
 )
