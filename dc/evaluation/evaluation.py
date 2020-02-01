@@ -56,7 +56,7 @@ class Evaluation:
         """
         # load the csv files, containing the results and gold data.
         logger.info("Loading data")
-        self.load_data()
+        self._load_data()
 
         # Preprocess captions
         logger.info("Preprocessing captions")
@@ -99,7 +99,7 @@ class Evaluation:
 
         # load the csv files, containing the results and gold data.
         logger.info("Loading data")
-        self.load_data()
+        self._load_data()
 
         # Preprocess captions
         logger.info("Preprocessing captions")
