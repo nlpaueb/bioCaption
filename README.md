@@ -22,13 +22,17 @@ from dc.models.baselines import Baselines
 from dc.evaluation.evaluation import Evaluation
 
 downloads = DownloadData()
-# download the iu_xray dataset in the current directory
+# downloads the iu_xray dataset in the current directory
 downloads.download_iu_xray()
+# downloads pubmed2018_w2v_200D word embeddings (https://archive.org/details/pubmed2018_w2v_200D.tar)
+downloads.download_bio_embeddings()
 
 baselines = Baselines('iu_xray/train_images.tsv','iu_xray/test_images.tsv','iu_xray/iu_xray_images/','results')
+# creates predictions based on the most frequent words used in train captions
 baselines.most_frequent_word_in_captions()
 
+# evaluates the predictions
 evaluation = Evaluation('iu_xray/test_images.tsv', 'results/most_frequent_word_results.tsv')
-evaluation.compute_WMD()
+evaluation.compute_WMD("pubmed2018_w2v_200D/pubmed2018_w2v_200D.bin")
 
 ```
