@@ -17,7 +17,7 @@ pip install dist/dc-0.1.tar.gz
 ### How to use
 
 ```python
-from dc.downloads.downloads import DownloadData
+from dc.data.downloads import DownloadData
 from dc.models.baselines import Baselines
 from dc.evaluation.evaluation import Evaluation
 
