@@ -60,8 +60,8 @@ class Evaluation:
 
         # Preprocess captions
         logger.info("Preprocessing captions")
-        self.gold_data = self.preprocess_captions(self.gold_data)
-        self.result_data = self.preprocess_captions(self.result_data)
+        self.gold_data = self._preprocess_captions(self.gold_data)
+        self.result_data = self._preprocess_captions(self.result_data)
 
         # Load word embeddings
         logger.info("Loading word embeddings....")
@@ -103,8 +103,8 @@ class Evaluation:
 
         # Preprocess captions
         logger.info("Preprocessing captions")
-        self.gold_data = self.preprocess_captions(self.gold_data)
-        self.result_data = self.preprocess_captions(self.result_data)
+        self.gold_data = self._preprocess_captions(self.gold_data)
+        self.result_data = self._preprocess_captions(self.result_data)
         if len(self.gold_data) == len(self.result_data):
             # Set up scorers
             scorers = [
