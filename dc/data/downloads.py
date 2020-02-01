@@ -11,7 +11,7 @@ from bs4 import BeautifulSoup
 
 class DownloadData:
 
-    _logger = conf.get_logger()
+    _logger = conf._get_logger()
 
     def __init__(self, dataset_path=conf.DOWNLOAD_PATH):
         self.dataset_path = dataset_path
