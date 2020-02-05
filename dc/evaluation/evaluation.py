@@ -1,5 +1,6 @@
 import re
 import gensim
+from jiwer import wer
 import pandas as pd
 from pycocoevalcap.bleu.bleu import Bleu
 from pycocoevalcap.meteor.meteor import Meteor
