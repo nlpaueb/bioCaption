@@ -159,7 +159,7 @@ class Evaluation:
             for str in self.result_data.values():
                 result_temp.append(str[0])
                 
-            error = wer(result_temp, gold_temp)
+            wer_score = wer(result_temp, gold_temp)
             print("WER =", wer_score)
             
         else:
