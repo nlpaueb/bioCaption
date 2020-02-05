@@ -148,7 +148,7 @@ class Evaluation:
 
             # Compute score for each metric
             logger.info("Computing WER score.")
-            wer_score = wer(ground_truth, hypothesis)
+            wer_score = wer(self.gold_data, self.result_data)
             print("WER =" + wer_score)
             
         else:
