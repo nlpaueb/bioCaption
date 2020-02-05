@@ -149,11 +149,21 @@ class Evaluation:
 
             # Compute score for each metric
             logger.info("Computing WER score.")
-            wer_score = wer(self.gold_data, self.result_data)
+            
+            gold_temp = []
+            result_temp = []
+            
+            # create arrays of strings from data
+            for str in evaluation.gold_data.values():
+                gold_temp.append(str[0])
+            for str in evaluation.result_data.values():
+                result_temp.append(str[0])
+                
+            error = wer(result_temp, gold_temp)
             print("WER =", wer_score)
             
         else:
             logger.error("Gold data len={0} and results data len={1} have not equal size"
-                         .format(len(self.gold_data.values()), len(self.result_data.values())))
+                         .format(len(self.gold_data), len(self.result_data)))
             
             
