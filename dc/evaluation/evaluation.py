@@ -150,7 +150,7 @@ class Evaluation:
             # Compute score for each metric
             logger.info("Computing WER score.")
             wer_score = wer(self.gold_data, self.result_data)
-            print("WER =" + wer_score)
+            print("WER =", wer_score)
             
         else:
             logger.error("Gold data len={0} and results data len={1} have not equal size"
