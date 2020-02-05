@@ -154,9 +154,9 @@ class Evaluation:
             result_temp = []
             
             # create arrays of strings from data
-            for str in evaluation.gold_data.values():
+            for str in self.gold_data.values():
                 gold_temp.append(str[0])
-            for str in evaluation.result_data.values():
+            for str in self.result_data.values():
                 result_temp.append(str[0])
                 
             error = wer(result_temp, gold_temp)
