@@ -154,6 +154,6 @@ class Evaluation:
             
         else:
             logger.error("Gold data len={0} and results data len={1} have not equal size"
-                         .format(len(self.gold_data), len(self.result_data)))
+                         .format(len(self.gold_data.values()), len(self.result_data.values())))
             
             
