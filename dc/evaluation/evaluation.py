@@ -128,3 +128,31 @@ class Evaluation:
                          .format(len(self.gold_data), len(self.result_data)))
 
 
+    def compute_WER(self):
+        """Performs the Word Error Rate evaluation. We used jiwer's implementation of WER (https://pypi.org/project/jiwer/)
+        
+        :param gts: Dictionary with the image ids and their gold captions,
+        :param res: Dictionary with the image ids ant their generated captions
+        :print: WER score
+        """
+
+        # load the csv files, containing the results and gold data.
+        logger.info("Loading data")
+        self._load_data()
+
+        # Preprocess captions
+        logger.info("Preprocessing captions")
+        self.gold_data = self._preprocess_captions(self.gold_data)
+        self.result_data = self._preprocess_captions(self.result_data)
+        if len(self.gold_data) == len(self.result_data):
+
+            # Compute score for each metric
+            logger.info("Computing WER score.")
+            wer_score = wer(ground_truth, hypothesis)
+            print("WER =" + wer_score)
+            
+        else:
+            logger.error("Gold data len={0} and results data len={1} have not equal size"
+                         .format(len(self.gold_data), len(self.result_data)))
+            
+            
