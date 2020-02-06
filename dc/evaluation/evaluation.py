@@ -147,20 +147,25 @@ class Evaluation:
         self.result_data = self._preprocess_captions(self.result_data)
         if len(self.gold_data) == len(self.result_data):
 
-            # Compute score for each metric
+            # Compute score
             logger.info("Computing WER score.")
             
             gold_temp = []
             result_temp = []
             
             # create arrays of strings from data
-            for str in self.gold_data.values():
+            for str in evaluation.gold_data.values():
                 gold_temp.append(str[0])
-            for str in self.result_data.values():
+            for str in evaluation.result_data.values():
                 result_temp.append(str[0])
-                
-            wer_score = wer(result_temp, gold_temp)
-            print("WER =", wer_score)
+
+            wer_score = 0
+            print(len(gold_temp))
+            for i in range(0, len(gold_temp)):
+                error = wer(result_temp[i], gold_temp[i])
+                print("Prediction ", i, " error: ", error)
+                temp_wer += error
+            print("WER =", wer_score/len(gold_temp))
             
         else:
             logger.error("Gold data len={0} and results data len={1} have not equal size"
