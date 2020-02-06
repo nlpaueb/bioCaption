@@ -154,9 +154,9 @@ class Evaluation:
             result_temp = []
             
             # create arrays of strings from data
-            for str in evaluation.gold_data.values():
+            for str in self.gold_data.values():
                 gold_temp.append(str[0])
-            for str in evaluation.result_data.values():
+            for str in self.result_data.values():
                 result_temp.append(str[0])
 
             wer_score = 0
@@ -164,7 +164,7 @@ class Evaluation:
             for i in range(0, len(gold_temp)):
                 error = wer(result_temp[i], gold_temp[i])
                 print("Prediction ", i, " error: ", error)
-                temp_wer += error
+                wer_score += error
             print("WER =", wer_score/len(gold_temp))
             
         else:
