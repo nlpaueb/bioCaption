@@ -96,8 +96,10 @@ class DownloadData:
             # Create target Directory
             path = abspath(path_join(self.dataset_path, dataset_folder_name, dataset_folder_name + "_images"))
             os.makedirs(path)
+            self._logger.info("Directory {0} has been created.".format(dataset_folder_name))
             print("Directory ", dataset_folder_name, " Created ")
         except FileExistsError:
+            self._logger.info("Directory {0} already exists".format(dataset_folder_name))
             print("Directory ", dataset_folder_name, " already exists")
 
     def download_bio_embeddings(self):
@@ -105,6 +107,7 @@ class DownloadData:
         # Unzip word embeddings
         os.system("tar xvzf pubmed2018_w2v_200D.tar.gz")
         os.system("rm  pubmed2018_w2v_200D.tar.gz")
+        self._logger.info("Bio embeddings file has been downloaded.")
 
     def _split_images(self, reports_images, img_keys, filename, text_of_reports=None):
         new_images = {}
@@ -129,20 +132,24 @@ class DownloadData:
         :param images_auto_tags: list with auto_tags
         :return:
         """
+        self._logger.info("Began writing dataset to file {0}".format(dataset_folder_name))
         write_path = abspath(path_join(self.dataset_path, dataset_folder_name))
-        with open(abspath(path_join(write_path, dataset_folder_name + '.tsv')), "w") as output_file:
-            for image_caption in images_captions:
-                output_file.write(image_caption + "\t" + images_captions[image_caption])
-                output_file.write("\n")
+        try:
+            with open(abspath(path_join(write_path, dataset_folder_name + '.tsv')), "w") as output_file:
+                for image_caption in images_captions:
+                    output_file.write(image_caption + "\t" + images_captions[image_caption])
+                    output_file.write("\n")
 
-        # Safer JSON storing
-        with open(abspath(path_join(write_path, dataset_folder_name + '_captions.json')), "w") as output_file:
-            output_file.write(json.dumps(images_captions))
-        with open(dataset_folder_name + "/" + dataset_folder_name + ".json", "w") as output_file:
-            output_file.write(json.dumps(images_tags))
-        if images_auto_tags is not None:
-            with open(abspath(path_join(write_path, dataset_folder_name + '_auto_tags.jsonn')), "w") as output_file:
-                output_file.write(json.dumps(images_auto_tags))
+            # Safer JSON storing
+            with open(abspath(path_join(write_path, dataset_folder_name + '_captions.json')), "w") as output_file:
+                output_file.write(json.dumps(images_captions))
+            with open(dataset_folder_name + "/" + dataset_folder_name + ".json", "w") as output_file:
+                output_file.write(json.dumps(images_tags))
+            if images_auto_tags is not None:
+                with open(abspath(path_join(write_path, dataset_folder_name + '_auto_tags.json')), "w") as output_file:
+                    output_file.write(json.dumps(images_auto_tags))
+        except:
+            self._logger.exception('Runtime Error/Exception in DownloadDatasets._write_dataset().')
 
     def _split_dataset(self, data, dataset_name_folder, split_rate, text_of_reports=None):
         """Splits the dataset into training and set.
@@ -170,6 +177,7 @@ class DownloadData:
         self._split_images(data, test_keys, test_path, text_of_reports=text_of_reports)
 
     def _download_dataset(self, dataset):
+        self._logger.info("Downloading {0}".format(dataset))
         if dataset is 'iu_xray':
             os.system("wget -P iu_xray/ https://openi.nlm.nih.gov/imgs/collections/NLMCXR_png.tgz")
             # data reports

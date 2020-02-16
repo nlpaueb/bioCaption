@@ -4,6 +4,7 @@ import re
 import numpy as np
 import pandas as pd
 from tqdm import tqdm
+from dc.configuration import get_logger
 from collections import Counter
 from img2vec_pytorch import Img2Vec
 from PIL import Image
@@ -12,6 +13,7 @@ sys.path.append("..")  # Adds higher directory to python modules path.
 
 
 class Baselines:
+
     def __init__(self, train_dir, test_dir, images_dir, results_dir):
         """
         :param train_dir: The directory to the train data tsv file with the form: "image \t caption"

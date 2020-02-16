@@ -4,9 +4,8 @@ import pandas as pd
 from pycocoevalcap.bleu.bleu import Bleu
 from pycocoevalcap.meteor.meteor import Meteor
 from pycocoevalcap.rouge.rouge import Rouge
-from dc.configuration import _get_logger
+from dc.configuration import logger
 
-logger = _get_logger()
 
 
 def _bioclean(token):
@@ -16,7 +15,9 @@ def _bioclean(token):
 
 
 class Evaluation:
-
+    
+    logger = logger()
+    
     def __init__(self, results_dir, gold_dir):
         self.results_dir = results_dir
         self.gold_dir = gold_dir
@@ -55,21 +56,21 @@ class Evaluation:
         :print: WMD and WMS scores
         """
         # load the csv files, containing the results and gold data.
-        logger.info("Loading data")
+        self._logger.info("Loading data")
         self.load_data()
 
         # Preprocess captions
-        logger.info("Preprocessing captions")
+        self._logger.info("Preprocessing captions")
         self.gold_data = self.preprocess_captions(self.gold_data)
         self.result_data = self.preprocess_captions(self.result_data)
 
         # Load word embeddings
-        logger.info("Loading word embeddings....")
+        self._logger.info("Loading word embeddings....")
         bio = gensim.models.KeyedVectors.load_word2vec_format(bio_path, binary=True)
-        logger.info("Loaded!")
+        self._logger.info("Loaded!")
 
         # Calculate WMD for each gts-res captions pair
-        logger.info("Calculating WMD for each pair...")
+        self._logger.info("Calculating WMD for each pair...")
         total_distance = 0
         img_wmds, similarities = {}, {}
 
@@ -87,7 +88,7 @@ class Evaluation:
 
             print("WMD =", wmd, ", WMS =", wms)
         else:
-            logger.error("Gold data len={0} and results data len={1} have not equal size"
+            self._logger.error("Gold data len={0} and results data len={1} have not equal size"
                          .format(len(self.gold_data), len(self.result_data)))
 
     def compute_ms_coco(self):
@@ -98,11 +99,11 @@ class Evaluation:
         """
 
         # load the csv files, containing the results and gold data.
-        logger.info("Loading data")
+        self._logger.info("Loading data")
         self.load_data()
 
         # Preprocess captions
-        logger.info("Preprocessing captions")
+        self._logger.info("Preprocessing captions")
         self.gold_data = self.preprocess_captions(self.gold_data)
         self.result_data = self.preprocess_captions(self.result_data)
         if len(self.gold_data) == len(self.result_data):
@@ -114,7 +115,7 @@ class Evaluation:
             ]
 
             # Compute score for each metric
-            logger.info("Computing COCO score.")
+            self._logger.info("Computing COCO score.")
             for scorer, method in scorers:
                 print("Computing", scorer.method(), "...")
                 score, scores = scorer.compute_score(self.gold_data, self.result_data)
@@ -124,7 +125,7 @@ class Evaluation:
                 else:
                     print("%s : %0.3f" % (method, score))
         else:
-            logger.error("Gold data len={0} and results data len={1} have not equal size"
+            self._logger.error("Gold data len={0} and results data len={1} have not equal size"
                          .format(len(self.gold_data), len(self.result_data)))
 
 
