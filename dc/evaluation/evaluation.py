@@ -4,9 +4,8 @@ import pandas as pd
 from pycocoevalcap.bleu.bleu import Bleu
 from pycocoevalcap.meteor.meteor import Meteor
 from pycocoevalcap.rouge.rouge import Rouge
-from dc.configuration import logger
-
-
+from dc.configuration import get_logger
+from dc.data.downloads import DownloadData
 
 def _bioclean(token):
     return re.sub('[.,?;*!%^&_+():-\[\]{}]', '',
@@ -16,7 +15,7 @@ def _bioclean(token):
 
 class Evaluation:
     
-    logger = logger()
+    logger = get_logger()
     
     def __init__(self, results_dir, gold_dir):
         self.results_dir = results_dir
@@ -52,7 +51,8 @@ class Evaluation:
 
         :param gts: Dictionary with the image ids and their gold captions
         :param res: Dictionary with the image ids ant their generated captions
-        :param bio_path: Path to the pre-trained biomedical word embeddings
+        :param bio_path: Path to the pre-trained biomedical word embeddings,
+                        if the ebmeddings are not there, they will be downloaded.
         :print: WMD and WMS scores
         """
         # load the csv files, containing the results and gold data.
@@ -65,9 +65,15 @@ class Evaluation:
         self.result_data = self.preprocess_captions(self.result_data)
 
         # Load word embeddings
-        self._logger.info("Loading word embeddings....")
-        bio = gensim.models.KeyedVectors.load_word2vec_format(bio_path, binary=True)
-        self._logger.info("Loaded!")
+        self._logger.info("Trying to load word embeddings....")
+        try:
+            bio = gensim.models.KeyedVectors.load_word2vec_format(bio_path, binary=True)
+            self._logger.info("Loaded!")
+        except FileNotFoundError:
+            download_data = DownloadData()
+            self._logger.info("Bio embeddings do not exists. Will try to download them "
+                              "in {0}".format(download_data.dataset_path+bio_path))
+            download_data.download_bio_embeddings(bio_path)
 
         # Calculate WMD for each gts-res captions pair
         self._logger.info("Calculating WMD for each pair...")
