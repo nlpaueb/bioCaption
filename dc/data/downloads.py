@@ -7,16 +7,17 @@ import xml.etree.ElementTree as ElementTree
 import dc.configuration as conf
 from os.path import join as path_join, abspath
 from bs4 import BeautifulSoup
+import dc.default_config as config
 
 
 class DownloadData:
 
     _logger = conf.get_logger()
 
-    def __init__(self, dataset_path=conf.DOWNLOAD_PATH):
+    def __init__(self, dataset_path=config.DOWNLOAD_PATH):
         self.dataset_path = dataset_path
 
-    def download_iu_xray(self, split_rate=0.9):
+    def download_iu_xray(self, split_rate=0.8):
         """Downloads the iu_xray dataset
         :param split_rate: Percentage of the dataset to be kept as training.
         :return: Writes a folder with the dataset name, in the current working
@@ -282,3 +283,7 @@ class DownloadData:
                 print("Extracted", image_sum, "image-caption pairs from the",
                       category_soup.find("li", class_="selected").find("a").get_text(), "category")
                 return image_captions, image_tags
+
+
+download = DownloadData()
+download.download_iu_xray()

@@ -1,12 +1,9 @@
 import logging
 import os
-
-DOWNLOAD_PATH = os.getcwd()
-log_level = logging.DEBUG
-
+from dc import default_config as config
 
 def get_logger():
     logger = logging.getLogger(__name__)
     logging.basicConfig(format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
-                        datefmt='%H:%M:%S', level=log_level)
+                        datefmt='%H:%M:%S', level=config.LOG_LEVEL)
     return logger
