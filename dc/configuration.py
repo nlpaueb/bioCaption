@@ -1,6 +1,6 @@
 import logging
-import os
 from dc import default_config as config
+
 
 def get_logger():
     logger = logging.getLogger(__name__)

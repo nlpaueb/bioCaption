@@ -1,12 +1,12 @@
 import os
 import sys
-import re
 import pandas as pd
 import numpy as np
 from tqdm import tqdm
 from collections import Counter
 from img2vec_pytorch import Img2Vec
 from PIL import Image
+import dc.data.data_functions as functions
 
 
 sys.path.append("..")  # Adds higher directory to python modules path.
@@ -29,12 +29,6 @@ class Baselines:
         if not os.path.exists(self.results_dir):
             os.makedirs(self.results_dir)
 
-    # Clean for BioASQ
-    def _bioclean(self, token):
-        return re.sub('[.,?;*!%^&_+():-\[\]{}]', '',
-                      token.replace('"', '').replace('/', '').replace('\\', '')
-                      .replace("'", '').strip().lower()).split()
-
     def most_frequent_word_in_captions(self, length=5):
         """
         Frequency baseline: uses the frequency of words in the training captions to always generate the same caption.
@@ -47,15 +41,9 @@ class Baselines:
         """
 
         # load train data to find most frequent words
-        caption_words = []
-        with open(self.train_dir, "r") as file:
-            for line in file:
-                image_ids, caption = line.replace("\n", "").split("\t")
-                #list of image ids
-                images_ids = images_ids.split(',')
-                caption_tokens = self._bioclean(caption)
-                for token in caption_tokens:
-                    caption_words.append(token)
+        train_data = functions.load_data(self.train_dir)
+        caption_words = functions.get_list_of_words_per_caption(train_data['split_captions'].to_numpy())
+        caption_words = caption_words.flatten()
 
         print("The number of total words is:", len(caption_words))
         print("The number of total words is:", len(caption_words))
@@ -69,7 +57,7 @@ class Baselines:
         print("The caption of most frequent words is:", caption)
 
         # Load test data and assign the frequency caption to every image to create results
-        test_data = pd.read_csv(self.test_dir, sep="\t", names=["image_ids", "captions"], header=None)
+        test_data = functions.load_data(self.test_dir)
         # Dictionary to save the test image ids and the frequency caption
         test_results = {}
         for index, row in test_data.iterrows():
@@ -81,7 +69,7 @@ class Baselines:
 
         return test_results
 
-    def one_nn(self, embeddings_func=util_functions.average, cuda=False):
+    def one_nn(self, embeddings_func=functions.average_embedding, cuda=False):
         """
         Nearest Neighbor Baseline: Img2Vec library (https://github.com/christiansafka/img2vec/) is used to obtain
         image embeddings, extracted from ResNet-18. For each test image the cosine similarity with all the training images
@@ -139,9 +127,6 @@ class Baselines:
         df.to_csv(os.path.join(self.results_dir, "onenn_results.tsv"), sep="\t", header=False)
 
         return sim_test_results
-
-    def average(self, embeddings_matrix):
-        return np.average(embeddings_matrix, axis=0)
 
     def images_to_vector(self, image_ids_list, img2vec, embeddings_func):
         vectors = []

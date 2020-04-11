@@ -284,6 +284,3 @@ class DownloadData:
                       category_soup.find("li", class_="selected").find("a").get_text(), "category")
                 return image_captions, image_tags
 
-
-download = DownloadData()
-download.download_iu_xray()
