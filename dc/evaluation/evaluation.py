@@ -4,20 +4,16 @@ import pandas as pd
 from pycocoevalcap.bleu.bleu import Bleu
 from pycocoevalcap.meteor.meteor import Meteor
 from pycocoevalcap.rouge.rouge import Rouge
-from dc.configuration import _get_logger
-
-logger = _get_logger()
-
-
-def _bioclean(token):
-    return re.sub('[.,?;*!%^&_+():-\[\]{}]', '',
-                  token.replace('"', '').replace('/', '').replace('\\', '')
-                  .replace("'", '').strip().lower())
+from dc.configuration import get_logger
+from dc.data.downloads import DownloadData
+from dc.data.data_functions import _bioclean
 
 
 class Evaluation:
-
-    def __init__(self, results_dir, gold_dir):
+    
+    logger = get_logger()
+    
+    def __init__(self, gold_dir, results_dir):
         self.results_dir = results_dir
         self.gold_dir = gold_dir
         self.gold_data = {}
@@ -51,25 +47,32 @@ class Evaluation:
 
         :param gts: Dictionary with the image ids and their gold captions
         :param res: Dictionary with the image ids ant their generated captions
-        :param bio_path: Path to the pre-trained biomedical word embeddings
+        :param bio_path: Path to the pre-trained biomedical word embeddings,
+                        if the ebmeddings are not there, they will be downloaded.
         :print: WMD and WMS scores
         """
         # load the csv files, containing the results and gold data.
-        logger.info("Loading data")
+        self._logger.info("Loading data")
         self.load_data()
 
         # Preprocess captions
-        logger.info("Preprocessing captions")
+        self._logger.info("Preprocessing captions")
         self.gold_data = self.preprocess_captions(self.gold_data)
         self.result_data = self.preprocess_captions(self.result_data)
 
         # Load word embeddings
-        logger.info("Loading word embeddings....")
-        bio = gensim.models.KeyedVectors.load_word2vec_format(bio_path, binary=True)
-        logger.info("Loaded!")
+        self._logger.info("Trying to load word embeddings....")
+        try:
+            bio = gensim.models.KeyedVectors.load_word2vec_format(bio_path, binary=True)
+            self._logger.info("Loaded!")
+        except FileNotFoundError:
+            download_data = DownloadData()
+            self._logger.info("Bio embeddings do not exists. Will try to download them "
+                              "in {0}".format(download_data.dataset_path+bio_path))
+            download_data.download_bio_embeddings(bio_path)
 
         # Calculate WMD for each gts-res captions pair
-        logger.info("Calculating WMD for each pair...")
+        self._logger.info("Calculating WMD for each pair...")
         total_distance = 0
         img_wmds, similarities = {}, {}
 
@@ -87,7 +90,7 @@ class Evaluation:
 
             print("WMD =", wmd, ", WMS =", wms)
         else:
-            logger.error("Gold data len={0} and results data len={1} have not equal size"
+            self._logger.error("Gold data len={0} and results data len={1} have not equal size"
                          .format(len(self.gold_data), len(self.result_data)))
 
     def compute_ms_coco(self):
@@ -98,11 +101,11 @@ class Evaluation:
         """
 
         # load the csv files, containing the results and gold data.
-        logger.info("Loading data")
+        self._logger.info("Loading data")
         self.load_data()
 
         # Preprocess captions
-        logger.info("Preprocessing captions")
+        self._logger.info("Preprocessing captions")
         self.gold_data = self.preprocess_captions(self.gold_data)
         self.result_data = self.preprocess_captions(self.result_data)
         if len(self.gold_data) == len(self.result_data):
@@ -114,7 +117,7 @@ class Evaluation:
             ]
 
             # Compute score for each metric
-            logger.info("Computing COCO score.")
+            self._logger.info("Computing COCO score.")
             for scorer, method in scorers:
                 print("Computing", scorer.method(), "...")
                 score, scores = scorer.compute_score(self.gold_data, self.result_data)
@@ -124,7 +127,7 @@ class Evaluation:
                 else:
                     print("%s : %0.3f" % (method, score))
         else:
-            logger.error("Gold data len={0} and results data len={1} have not equal size"
+            self._logger.error("Gold data len={0} and results data len={1} have not equal size"
                          .format(len(self.gold_data), len(self.result_data)))
 
 
