@@ -1,6 +1,7 @@
+import os
+import re
 import numpy as np
 import pandas as pd
-import re
 
 
 def average_embedding(embeddings_matrix):
@@ -21,7 +22,7 @@ def _bioclean(caption):
 
 def get_list_of_words_per_caption(dataframe_data):
     dataframe_data["split_captions"] = dataframe_data["captions"]\
-        .apply(lambda x: _bioclean(x).split(' '))
+        .apply(lambda x: _bioclean(x))
     return dataframe_data
 
 
@@ -30,7 +31,12 @@ def load_data(data_dir):
                        names=["image_ids", "captions"],
                        header=None)
     data['img_ids_list'] = data.image_ids.apply(lambda x: x.split(','))
-    data = data[['img_ids_list', 'captions']].copy()
     return data
+
+
+def save_results(results_dictionary, file_name):
+    # Save test results to tsv file
+    df = pd.DataFrame.from_dict(results_dictionary, orient="index")
+    df.to_csv(os.path.join(results_dictionary, file_name+"tsv"), sep="\t", header=False)
 
 

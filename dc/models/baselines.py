@@ -42,8 +42,9 @@ class Baselines:
 
         # load train data to find most frequent words
         train_data = functions.load_data(self.train_dir)
-        caption_words = functions.get_list_of_words_per_caption(train_data['split_captions'].to_numpy())
-        caption_words = caption_words.flatten()
+        train_data = functions.get_list_of_words_per_caption(train_data)
+        caption_words = train_data['split_captions'].to_list()
+        caption_words = [word for caption_list in caption_words for word in caption_list]
 
         print("The number of total words is:", len(caption_words))
         print("The number of total words is:", len(caption_words))
@@ -64,9 +65,7 @@ class Baselines:
             test_results[row["image_ids"]] = caption
 
         # Save test results to tsv file
-        df = pd.DataFrame.from_dict(test_results, orient="index")
-        df.to_csv(os.path.join(self.results_dir, "most_frequent_word_results.tsv"), sep="\t", header=False)
-
+        functions.save_results(test_results, "most_frequent_word_results")
         return test_results
 
     def one_nn(self, embeddings_func=functions.average_embedding, cuda=False):
@@ -81,13 +80,10 @@ class Baselines:
         If a GPU is available pass True
         :return: Dictionary with the results
         """
-
         img2vec = Img2Vec(cuda=cuda)
 
         # Load train data
-        train_data = pd.read_csv(self.train_dir, sep="\t", header=None)
-        train_data.columns = ["ids", "caption"]
-        train_images = dict(zip(train_data.ids, train_data.caption))
+        train_data = functions.load_data(self.train_dir)
 
         # Get embeddings of train images
         print("Calculating visual embeddings from train images")
