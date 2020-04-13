@@ -6,18 +6,14 @@ from pycocoevalcap.meteor.meteor import Meteor
 from pycocoevalcap.rouge.rouge import Rouge
 from dc.configuration import get_logger
 from dc.data.downloads import DownloadData
-
-def _bioclean(token):
-    return re.sub('[.,?;*!%^&_+():-\[\]{}]', '',
-                  token.replace('"', '').replace('/', '').replace('\\', '')
-                  .replace("'", '').strip().lower())
+from dc.data.data_functions import _bioclean
 
 
 class Evaluation:
     
     logger = get_logger()
     
-    def __init__(self, results_dir, gold_dir):
+    def __init__(self, gold_dir, results_dir):
         self.results_dir = results_dir
         self.gold_dir = gold_dir
         self.gold_data = {}

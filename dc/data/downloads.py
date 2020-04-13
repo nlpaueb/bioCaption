@@ -103,12 +103,6 @@ class DownloadData:
             self._logger.info("Directory {0} already exists".format(dataset_folder_name))
             print("Directory ", dataset_folder_name, " already exists")
 
-    def download_bio_embeddings(self, path):
-        os.system("wget"+"-P "+path+" https://archive.org/download/pubmed2018_w2v_200D.tar/pubmed2018_w2v_200D.tar.gz")
-        # Unzip word embeddings
-        os.system("tar xvzf pubmed2018_w2v_200D.tar.gz")
-        os.system("rm  pubmed2018_w2v_200D.tar.gz")
-        self._logger.info("Bio embeddings file has been downloaded.")
 
     def _split_images(self, reports_images, img_keys, filename, text_of_reports=None):
         new_images = {}

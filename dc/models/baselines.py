@@ -29,6 +29,11 @@ class Baselines:
         if not os.path.exists(self.results_dir):
             os.makedirs(self.results_dir)
 
+    def image_to_vector(self, img2vec, image_id):
+        image = Image.open(os.path.join(self.images_dir, image_id))
+        image = image.convert('RGB')
+        return img2vec.get_vec(image)
+
     def most_frequent_word_in_captions(self, length=5):
         """
         Frequency baseline: uses the frequency of words in the training captions to always generate the same caption.
@@ -65,17 +70,17 @@ class Baselines:
             test_results[row["image_ids"]] = caption
 
         # Save test results to tsv file
-        functions.save_results(test_results, "most_frequent_word_results")
+        functions.save_results(test_results, self.results_dir, "most_frequent_word_results")
         return test_results
 
-    def one_nn(self, embeddings_func=functions.average_embedding, cuda=False):
+    def one_nn(self, vector_function = functions.average_embedding, cuda=False):
         """
         Nearest Neighbor Baseline: Img2Vec library (https://github.com/christiansafka/img2vec/) is used to obtain
         image embeddings, extracted from ResNet-18. For each test image the cosine similarity with all the training images
         is computed in order to retrieve similar training images.
         The caption of the most similar retrieved image is returned as the generated caption of the test image.
 
-        :param embeddings_func: function that accepts a numpy array nxm and returns a numpy array 1xm
+        :param vector_function: function that accepts a numpy array nxm and returns a numpy array 1xm
         :param cuda: Boolean value of whether to use cuda for image embeddings extraction. Default: False
         If a GPU is available pass True
         :return: Dictionary with the results
@@ -84,19 +89,21 @@ class Baselines:
 
         # Load train data
         train_data = functions.load_data(self.train_dir)
+        train_images = dict(zip(train_data.image_ids, train_data.caption))
 
-        # Get embeddings of train images
         print("Calculating visual embeddings from train images")
         train_images_vec = {}
         print("Extracting embeddings for all train images...")
-        for train_image_ids in tqdm(train_data.id):
-            vector = self.images_to_vector(train_image_ids.split(','), img2vec, embeddings_func)
-            train_images_vec[train_image_ids] = vector
+        for train_image_lists in train_data.img_ids_list:
+            image_vectors = []
+            for train_image in tqdm(train_image_lists):
+                image_vectors.append(self.image_to_vector(img2vec, train_image))
+
+            train_images_vec[','.join(train_image_lists)] = vector_function(np.array(image_vectors))
         print("Got embeddings for train images.")
 
         # Load test data
-        test_data = pd.read_csv(self.test_dir, sep="\t", header=None)
-        test_data.columns = ["id", "caption"]
+        test_data = functions.load_data(self.test_dir)
 
         # Save IDs and raw image vectors separately but aligned
         ids = [i for i in train_images_vec]
@@ -106,9 +113,12 @@ class Baselines:
         raw = raw / np.array([np.sum(raw, 1)] * raw.shape[1]).transpose()
         sim_test_results = {}
 
-        for test_image_ids in tqdm(test_data.id):
-            # Get test image embedding
-            vector = self.images_to_vector(test_image_ids.split(','), img2vec, embeddings_func)
+        for test_image_ids in test_data.img_ids_list:
+            test_vectors = []
+            for test_image in tqdm(test_image_ids):
+                # Get test image embedding
+                test_vectors.append(self.image_to_vector(img2vec, test_image))
+            vector = vector_function(np.array(test_vectors))
             # Compute cosine similarity with every train image
             vector = vector / np.sum(vector)
             # Clone to do efficient mat mul dot
@@ -116,18 +126,8 @@ class Baselines:
             sims = np.sum(test_mat * raw, 1)
             top1 = np.argmax(sims)
             # Assign the caption of the most similar train image
-            sim_test_results[test_image_ids] = train_images[ids[top1]]
+            sim_test_results[','.join(test_image_ids)] = train_images[ids[top1]]
 
         # Save test results to tsv file
-        df = pd.DataFrame.from_dict(sim_test_results, orient="index")
-        df.to_csv(os.path.join(self.results_dir, "onenn_results.tsv"), sep="\t", header=False)
-
+        functions.save_results(sim_test_results, self.results_dir, "onenn_results.tsv")
         return sim_test_results
-
-    def images_to_vector(self, image_ids_list, img2vec, embeddings_func):
-        vectors = []
-        for image_id in image_ids_list:
-            image = Image.open(os.path.join(self.images_dir, image_id))
-            image = image.convert('RGB')
-            vectors.append(img2vec.get_vec(image))
-        return embeddings_func(vectors)
