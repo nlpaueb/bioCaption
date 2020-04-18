@@ -75,8 +75,8 @@ class Evaluation:
 
         if len(self.gold_data) == len(self.result_data):
             for image in self.gold_data:
-                print(self.gold_data[image])
-                distance = bio.wmdistance(self.gold_data[image][0].split(), self.result_data[image][0].split())
+                self.logger.debug(self.gold_data[image])
+                distance = bio.wmdistance(self.gold_data[image][0], self.result_data[image][0])
                 similarities[image] = (1. / (1. + distance))
                 total_distance = total_distance + distance
                 img_wmds[image] = distance
@@ -87,13 +87,13 @@ class Evaluation:
 
             print("WMD =", wmd, ", WMS =", wms)
         else:
-            self.logger.error("Gold data len={0} and results data len={1} have not equal size"
+            self.logger.error("Gold data len={0} and results data len={1} do not equal size"
                               .format(len(self.gold_data), len(self.result_data)))
 
     def compute_ms_coco(self):
         """Performs the MS COCO evaluation using the Python 3 implementation (https://github.com/salaniz/pycocoevalcap)
         :param gts: Dictionary with the image ids and their gold captions,
-        :param res: Dictionary with the image ids ant their generated captions
+        :param res: Dictionary with the image ids and their generated captions
         :print: Evaluation score (the mean of the scores of all the instances) for each measure
         """
 
