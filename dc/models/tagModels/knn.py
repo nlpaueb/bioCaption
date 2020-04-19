@@ -1,7 +1,5 @@
 import os
 import sys
-import pickle
-import pandas as pd
 import numpy as np
 from tqdm import tqdm
 from collections import Counter
@@ -10,7 +8,6 @@ from keras.applications.densenet import DenseNet121
 from keras.models import Model
 import keras.applications.densenet as densenet
 from keras.preprocessing import image
-
 from sklearn.metrics import f1_score
 
 sys.path.append("..")  # Adds higher directory to python modules path.
@@ -31,14 +28,14 @@ class Knn:
         self.train_data = {}
         self.test_data = {}
         self.val_data = {}
-        self.train_concepts = []
-        self.val_concepts = []
         self.data_dir = data_dir
+        self.ids = []
+        self.raw = []
         if not os.path.exists(self.results_dir):
             os.makedirs(self.results_dir)
 
     def _load_data(self):
-        self.test_data, self.test_data, self.val_data, self.train_concepts, self.val_concepts\
+        self.train_data, self.test_data, self.val_data, _, _\
             = create_tag_dataset(self.data_dir)
 
     def compute_image_embedding(self, image_path):
@@ -47,6 +44,19 @@ class Knn:
         img_vec = np.expand_dims(img_vec, axis=0)
         img_vec = densenet.preprocess_input(img_vec)
         return img_vec
+
+    def create_vectors_for_image_set(self, data, img_path, vector_extraction_model):
+        train_images_vec = {}
+        print("Extracting embeddings for all train images...")
+        for train_image in tqdm(data.keys()):
+            image_path = os.path.join(img_path, train_image)
+            x = self.compute_image_embedding(image_path)
+            vec = vector_extraction_model.predict(x).transpose().flatten()
+            train_images_vec[train_image] = vec
+            print("Got embeddings for train images.")
+        return train_images_vec
+
+
 
     # F1 evaluation function downloaded from the competition
     def evaluate_f1(self, gt_pairs, candidate_pairs):
@@ -70,20 +80,18 @@ class Knn:
         for image_key in candidate_pairs:
 
             # Get candidate and GT concepts
-            candidate_concepts = candidate_pairs[image_key].upper()
-            gt_concepts = gt_pairs[image_key].upper()
+            candidate_concepts = candidate_pairs[image_key]
+            gt_concepts = gt_pairs[image_key]
 
             # Split concept string into concept array
             # Manage empty concept lists
-            if gt_concepts.strip() == '':
-                gt_concepts = []
-            else:
-                gt_concepts = gt_concepts.split(';')
+            if len(gt_concepts) != 0:
+                gt_concepts = gt_concepts[0].split(';')
 
-            if candidate_concepts.strip() == '':
-                candidate_concepts = []
+            if len(candidate_concepts) != 0:
+                candidate_concepts = candidate_concepts[0].split(';')
             else:
-                candidate_concepts = candidate_concepts.split(';')
+                candidate_concepts = []
 
             # Manage empty GT concepts (ignore in evaluation)
             if len(gt_concepts) == 0:
@@ -121,17 +129,57 @@ class Knn:
                 mean_f1_score = current_score / max_score
         return mean_f1_score
 
-    def tune_k(self, image_similarities, ids):
+    def knn(self):
+        self._load_data()
+        base_model = DenseNet121(weights='imagenet', include_top=True)
+        vector_extraction_model = \
+            Model(inputs=base_model.input, outputs=base_model.get_layer("avg_pool").output)
+        print("Calculating visual embeddings from train images")
+        train_images_vec = {}
+        print("Extracting embeddings for all train images...")
+        for train_image in tqdm(self.train_data.keys()):
+            image_path = os.path.join(self.images_dir, train_image)
+            x = self.compute_image_embedding(image_path)
+            vec = vector_extraction_model.predict(x).transpose().flatten()
+            train_images_vec[train_image] = vec
+            print("Got embeddings for train images.")
+
+        # save IDs and raw image vectors seperately but aligned
+        self.ids = [i for i in train_images_vec]
+        self.raw = np.array([train_images_vec[i] for i in train_images_vec])
+        # normalize image vectors to avoid normalized cosine and use dot
+        self.raw = self.raw / np.array([np.sum(self.raw, 1)] * self.raw.shape[1]).transpose()
+
+        # measure the similarity of each val img embedding with all train img embeddings
+        images_sims = {}
+        for val_image in tqdm(self.val_data.keys()):
+            image_path = os.path.join(self.images_dir, val_image)
+            x = self.compute_image_embedding(image_path)
+            vec = vector_extraction_model.predict(x).transpose().flatten()
+            vec = vec / np.sum(vec)
+            # clone to do efficient mat mul dot
+            test_mat = np.array([vec] * self.raw.shape[0])
+            sims = np.sum(test_mat * self.raw, 1)
+            # save the similarities array for every test image
+            images_sims[val_image] = sims
+
+        print("Found similarities of validation images.")
+        max_score, best_k = self.tune_k(images_sims)
+        print("Found best score on val:", max_score, "for k =", best_k)
+        self.test_knn(best_k)
+
+    def tune_k(self, images_sims):
         # tune k at validation data
+        best_k = 1
         max_score = 0  # max score is initially zero
         for k in tqdm(range(1, 201)):  # search k from 1 to 200
             val_results = {}  # store validation images and their predicted concepts
-            for image_sim in image_similarities:  # for each val image get all similarities of that image with train images
-                topk = np.argsort(image_similarities[image_sim])[-k:]  # get the k most similar images
+            for image_sim in images_sims:  # for each val image get all similarities of that image with train images
+                topk = np.argsort(images_sims[image_sim])[-k:]  # get the k most similar images
                 concepts_list = []  # store the concepts for that image
                 sum_concepts = 0  # store total num of concepts in the k images
                 for index in topk:  # for each similar image update the concept list (of the test image in question)
-                    concepts = train_images[ids[index]].split(";")
+                    concepts = self.train_data[self.ids[index]]
                     sum_concepts += len(concepts)
                     for concept in concepts:
                         concepts_list.append(concept)
@@ -139,54 +187,44 @@ class Knn:
                 val_results[image_sim] = ";".join(
                     f[0] for f in frequent_concepts)  # process to match competition evaluation
             # evaluate k-nn for this k and if better, update the max score
-            score = self.evaluate_f1(val_images, val_results)
+            score = self.evaluate_f1(self.val_data, val_results)
             if score > max_score:
                 max_score = score
                 best_k = k
-        print("Found best score on val:", max_score, "for k=", best_k)
-        return max_score, k
+        return max_score, best_k
 
-    def knn(self):
-        train_images = []
-        path_to_images = []
-        #Load pre-trained image encodes
+    def test_knn(self, best_k):
         base_model = DenseNet121(weights='imagenet', include_top=True)
         vector_extraction_model = \
             Model(inputs=base_model.input, outputs=base_model.get_layer("avg_pool").output)
-
-        print("Calculating visual embeddings from train images")
-        train_images_vec = {}
-        print("Extracting embeddings for all train images...")
-        for train_image in tqdm(train_images):
-            image_path = os.path.join(path_to_images, train_image + ".jpg")
-            x = self.compute_image_embedding(image_path)
-            vec = vector_extraction_model.predict(x).transpose().flatten()
-            train_images_vec[train_image] = vec
-            print("Got embeddings for train images.")
-
-        # save IDs and raw image vectors seperately but aligned
-        ids = [i for i in train_images_vec]
-        raw = np.array([train_images_vec[i] for i in train_images_vec])
-        # normalize image vectors to avoid normalized cosine and use dot
-        raw = raw / np.array([np.sum(raw, 1)] * raw.shape[1]).transpose()
-
-        # get concepts of val images
-        val_images = self.val_concepts
-        # measure the similarity of each val img embedding with all train img embeddings
-        images_sims = {}
-        for val_image in tqdm(val_images):
-            image_path = os.path.join(path_to_val_images, val_image + ".jpg")
-            x = self.compute_image_embedding(image_path)
+        sim_test_results = {}
+        test_images = self.test_data
+        for i, test_image in tqdm(enumerate(test_images)):
+            image_path = os.path.join(self.images_dir, test_image)
+            img = image.load_img(image_path, target_size=(224, 224))
+            x = image.img_to_array(img)
+            x = np.expand_dims(x, axis=0)
+            x = densenet.preprocess_input(x)
             vec = vector_extraction_model.predict(x).transpose().flatten()
             vec = vec / np.sum(vec)
             # clone to do efficient mat mul dot
-            test_mat = np.array([vec] * raw.shape[0])
-            sims = np.sum(test_mat * raw, 1)
+            test_mat = np.array([vec] * self.raw.shape[0])
+            sims = np.sum(test_mat * self.raw, 1)
+            topk = np.argsort(sims)[-best_k:]
+            concepts_list = []
+            sum_concepts = 0
+            for index in topk:
+                concepts = self.train_data[self.ids[index]]
+                sum_concepts += len(concepts)
+                for concept in concepts:
+                    concepts_list.append(concept)
+            frequent_concepts = Counter(concepts_list).most_common(round(sum_concepts / best_k))
+            sim_test_results[test_image] = ";".join(f[0] for f in frequent_concepts)
+        print("Saving test results...")
+        with open(os.path.join(self.results_dir,"results_knn.csv"), 'w') as output_file:
+            for result in sim_test_results:
+                output_file.write(result + "\t" + sim_test_results[result])
+                output_file.write("\n")
 
-            # save the similarities array for every test image
-            images_sims[val_image] = sims
-        print("Found similarities of validation images.")
-        best_k, max_score = self.tune_k(image_similarities, ids)
-        print("Found best score on val:", max_score, "for k=", best_k)
 
 

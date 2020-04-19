@@ -49,7 +49,7 @@ def download_bio_embeddings(path):
     os.system("rm  pubmed2018_w2v_200D.tar.gz")
 
 
-def create_tag_dataset(path, split_dataset=[0.7, 0.2, 0.1]):
+def create_tag_dataset(path, split_dataset=[0.6, 0.1, 0.3]):
     with open(path) as json_file:
         data = json.load(json_file)
         keys = list(data.keys())
@@ -66,7 +66,7 @@ def create_tag_dataset(path, split_dataset=[0.7, 0.2, 0.1]):
         val_concepts = []
         for key in train_keys:
             train[key] = data[key]
-            train_concepts.extend(data.key)
+            train_concepts.extend(data[key])
         for key in test_keys:
             test[key] = data[key]
         for key in val_keys:
