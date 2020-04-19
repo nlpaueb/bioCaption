@@ -1,9 +1,10 @@
 import os
 import sys
+import json
+import math
 import numpy as np
 from tqdm import tqdm
 from collections import Counter
-from dc.data.data_functions import create_tag_dataset
 from keras.applications.densenet import DenseNet121
 from keras.models import Model
 import keras.applications.densenet as densenet
@@ -15,7 +16,7 @@ sys.path.append("..")  # Adds higher directory to python modules path.
 
 class Knn:
 
-    def __init__(self, data_dir, images_dir, results_dir):
+    def __init__(self, data_dir, images_dir, results_dir, split_ratio=[0.6, 0.3, 0.1]):
         """
         :param train_dir: The directory to the train data tsv file with the form: "[image1,image2] \t caption"
         :param test_dir: The directory to the test data tsv file with the form: "[image1, imager2] \t caption"
@@ -31,12 +32,32 @@ class Knn:
         self.data_dir = data_dir
         self.ids = []
         self.raw = []
+        self.split_ratio = split_ratio
         if not os.path.exists(self.results_dir):
             os.makedirs(self.results_dir)
 
-    def _load_data(self):
-        self.train_data, self.test_data, self.val_data, _, _\
-            = create_tag_dataset(self.data_dir)
+    def _create_dataset(self, path):
+        with open(path) as json_file:
+            data = json.load(json_file)
+            keys = list(data.keys())
+            train_pointer = math.ceil(self.split_ratio[0] * len(keys))
+            test_pointer = math.ceil(self.split_ratio[1] * len(keys))
+            val_pointer = math.ceil(self.split_ratio[2] * len(keys))
+            train_keys = keys[:train_pointer]
+            val_keys = keys[train_pointer:train_pointer + val_pointer]
+            test_keys = keys[train_pointer + val_pointer:val_pointer + train_pointer + test_pointer]
+            train = {}
+            test = {}
+            val = {}
+            for key in train_keys:
+                train[key] = data[key]
+            for key in test_keys:
+                test[key] = data[key]
+            for key in val_keys:
+                val[key] = data[key]
+            self.train_data = train
+            self.val_data = val
+            self.test_data = test
 
     def compute_image_embedding(self, image_path):
         img = image.load_img(image_path, target_size=(224, 224))
@@ -56,9 +77,6 @@ class Knn:
             print("Got embeddings for train images.")
         return train_images_vec
 
-
-
-    # F1 evaluation function downloaded from the competition
     def evaluate_f1(self, gt_pairs, candidate_pairs):
         # Concept stats
         min_concepts = sys.maxsize
@@ -130,7 +148,7 @@ class Knn:
         return mean_f1_score
 
     def knn(self):
-        self._load_data()
+        self._create_dataset(self.data_dir)
         base_model = DenseNet121(weights='imagenet', include_top=True)
         vector_extraction_model = \
             Model(inputs=base_model.input, outputs=base_model.get_layer("avg_pool").output)
