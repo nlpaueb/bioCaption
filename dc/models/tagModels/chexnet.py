@@ -1,43 +1,19 @@
-# CheXNet extended for extreme biomedical multi label classification
-from numpy.random import seed
-seed(42)
-#from tensorflow import
-#set_random_seed(42)
-from keras.applications.densenet import DenseNet121
-from keras.applications.densenet import preprocess_input
-from keras.models import Model
-from keras.layers import Dense
-from keras import backend as K
-from keras.preprocessing import image
-from keras.initializers import glorot_uniform
-from keras.preprocessing.image import ImageDataGenerator
-import pandas as pd
-import numpy as np
 import os
+import sys
+import numpy as np
 import json
 import math
 from tqdm import tqdm
-from keras.callbacks import EarlyStopping, ModelCheckpoint, TensorBoard, CSVLogger, ReduceLROnPlateau
-from math import ceil
-import random
-import sys
-from keras.models import load_model
-
-from sklearn.metrics import f1_score
-
-random.seed(42)
-
-import os
-import sys
-import numpy as np
-from tqdm import tqdm
-from collections import Counter
+from keras.applications.densenet import preprocess_input
+from keras.layers import Dense
+from keras.initializers import glorot_uniform
+from keras.callbacks import EarlyStopping, ModelCheckpoint, ReduceLROnPlateau
 from keras.applications.densenet import DenseNet121
 from keras.models import Model
-import keras.applications.densenet as densenet
 from keras.preprocessing import image
 from sklearn.metrics import f1_score
 
+np.random.seed(42)
 sys.path.append("..")  # Adds higher directory to python modules path.
 
 
@@ -59,9 +35,9 @@ class Chexnet:
         self.train_concepts = []
         self.val_concepts = []
         self.data_dir = data_dir
-        self.ids = []
-        self.raw = []
         self.split_ratio = split_ratio
+        self._create_dataset(self.data_dir)
+        self.model = None
         if not os.path.exists(self.results_dir):
             os.makedirs(self.results_dir)
 
@@ -111,10 +87,10 @@ class Chexnet:
                     concepts[i] = 1
             x_data.append(x)
             y_data.append(concepts)
-        #creates images and labels
+        # creates images and labels
         return np.array(x_data), np.array(y_data)
 
-    def load_test_images(self, path_to_images, filepath):
+    def load_images(self):
         x_test = []
         for img_id, tags in tqdm(self.test_data):
             image_path = os.path.join(self.images_dir, img_id)
@@ -192,11 +168,11 @@ class Chexnet:
         return mean_f1_score
 
     def train_generator(self, images, labels, batch_size, num_tags):
-        random.seed(42)
-        num_of_batches = ceil(len(images) / batch_size)
+        np.random.seed(42)
+        num_of_batches = math.ceil(len(images) / batch_size)
         while True:
             lists = list(zip(images, labels))
-            random.shuffle(lists)
+            np.random.shuffle(lists)
             images, labels = zip(*lists)
             for batch in range(num_of_batches):
                 if len(images) - (batch * batch_size) < batch_size:
@@ -214,11 +190,11 @@ class Chexnet:
                 yield batch_features, batch_labels
 
     def val_generator(self, images, labels, batch_size, num_tags):
-        random.seed(42)
-        num_of_batches = ceil(len(images) / batch_size)
+        np.random.seed(42)
+        num_of_batches = math.ceil(len(images) / batch_size)
         while True:
             lists = list(zip(images, labels))
-            random.shuffle(lists)
+            np.random.shuffle(lists)
             images, labels = zip(*lists)
             for batch in range(num_of_batches):
                 if len(images) - (batch * batch_size) < batch_size:
@@ -243,11 +219,15 @@ class Chexnet:
         concept_outputs = Dense(num_tags, activation="sigmoid", name="concept_outputs", kernel_initializer=my_init)(x)
         model = Model(inputs=base_model.input, outputs=concept_outputs)
         model.compile(optimizer="adam", loss="binary_crossentropy", metrics=["binary_accuracy"])
+        self.model = model
 
-        return model
+    def tune_decision_threshold(self):
+        pass
 
-    def chexnet(self, num_tags, batch_size=2, epochs=2):
-        model = self.chexnet_model(num_tags)
+    def chexnet(self, batch_size=2, epochs=2):
+        num_tags = len(self.train_concepts)
+        print(num_tags)
+        self.chexnet_model(num_tags)
         # add early stopping
         early_stopping = EarlyStopping(monitor="val_loss", patience=3, mode="auto", restore_best_weights=True)
         # save best model
@@ -256,20 +236,42 @@ class Chexnet:
         # train the model
         x_train, y_train = self.load_data(self.train_data, self.train_concepts)
         x_val, y_val = self.load_data(self.val_data, self.train_concepts)
-        history = model.fit_generator(
+        history = self.model.fit_generator(
             self.train_generator(x_train, y_train, batch_size, num_tags),
-            steps_per_epoch=ceil(len(x_train) / batch_size),
+            steps_per_epoch=math.ceil(len(x_train) / batch_size),
             epochs=epochs,
             verbose=2,
             callbacks=[early_stopping, checkpoint, reduce_lr],
             validation_data=self.val_generator(x_val, y_val, batch_size, num_tags),
-            validation_steps=ceil(len(x_val) / batch_size))
+            validation_steps=math.ceil(len(x_val) / batch_size)
+        )
 
-        path = '/home/mary/Documents/Projects/dc/iu_xray/tags.json'
-        self._create_dataset(path)
-        x, y = self.load_data(self.train_data, self.train_concepts)
+    def load_trained_model(self, weights_path):
         self.chexnet_model(len(self.train_concepts))
+        self.model.load_weights(weights_path)
 
-path = '/home/mary/Documents/Projects/dc/iu_xray/'
-ch = Chexnet(path+'tags.json', path+'iu_xray_images/', 'results_tag')
-ch.chexnet()
+    def chexnet_test(self, model_path=None):
+        if model_path is not None:
+            self.load_trained_model(path)
+        print("Loading test images...")
+        test_images = self.load_images()
+
+        # get predictions for dev
+        test_predictions = self.model.predict(test_images, batch_size=16, verbose=1)
+        print("Got predictions for dev set")
+        results = {}
+        for i in range(len(test_predictions)):
+            concepts_pred = []
+            for j in range(len(self.train_concepts)):
+                if test_predictions[i, j] >= 0.5:
+                    concepts_pred.append(self.train_concepts[j])
+            results[self.test_data[i]] = ";".join(concepts_pred)
+        # evaluate results
+        dev_score = self.evaluate_f1(self.test_data, results)
+        print("The F1 score on dev set is: ", dev_score)
+        # save results
+        with open("chexnet_results.csv", "w") as output_file:
+            for result in results:
+                output_file.write(result + "\t" + results[result])
+                output_file.write("\n")
+
