@@ -94,11 +94,10 @@ class Knn:
             exit(1)
 
         # Evaluate each candidate concept list against the ground truth
-        i = 0
         for image_key in candidate_pairs:
 
             # Get candidate and GT concepts
-            candidate_concepts = candidate_pairs[image_key]
+            candidate_concepts = candidate_pairs[image_key].split(';')
             gt_concepts = gt_pairs[image_key]
 
             # Split concept string into concept array
@@ -106,9 +105,7 @@ class Knn:
             if len(gt_concepts) != 0:
                 gt_concepts = gt_concepts[0].split(';')
 
-            if len(candidate_concepts) != 0:
-                candidate_concepts = candidate_concepts[0].split(';')
-            else:
+            if len(candidate_concepts) == 0:
                 candidate_concepts = []
 
             # Manage empty GT concepts (ignore in evaluation)
@@ -189,10 +186,10 @@ class Knn:
     def tune_k(self, images_sims):
         # tune k at validation data
         best_k = 1
-        max_score = 0  # max score is initially zero
-        for k in tqdm(range(1, 201)):  # search k from 1 to 200
+        max_score = 0
+        for k in tqdm(range(1, 201)):
             val_results = {}  # store validation images and their predicted concepts
-            for image_sim in images_sims:  # for each val image get all similarities of that image with train images
+            for image_sim in images_sims:
                 topk = np.argsort(images_sims[image_sim])[-k:]  # get the k most similar images
                 concepts_list = []  # store the concepts for that image
                 sum_concepts = 0  # store total num of concepts in the k images
