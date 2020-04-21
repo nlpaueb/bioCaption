@@ -97,15 +97,17 @@ class Knn:
         for image_key in candidate_pairs:
 
             # Get candidate and GT concepts
-            candidate_concepts = candidate_pairs[image_key].split(';')
+            candidate_concepts = candidate_pairs[image_key]
             gt_concepts = gt_pairs[image_key]
 
             # Split concept string into concept array
             # Manage empty concept lists
-            if len(gt_concepts) != 0:
-                gt_concepts = gt_concepts[0].split(';')
+            if len(gt_concepts) == 0:
+                gt_concepts = []
 
-            if len(candidate_concepts) == 0:
+            if len(candidate_concepts) != 0:
+                candidate_concepts = candidate_concepts.split(';')
+            else:
                 candidate_concepts = []
 
             # Manage empty GT concepts (ignore in evaluation)

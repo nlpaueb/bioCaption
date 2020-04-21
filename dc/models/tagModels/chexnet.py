@@ -90,15 +90,17 @@ class Chexnet:
         # creates images and labels
         return np.array(x_data), np.array(y_data)
 
-    def load_images(self):
-        x_test = []
-        for img_id, tags in tqdm(self.test_data):
+    def load_images_ids(self, data):
+        x_images = []
+        x_images_ids = []
+        for img_id in tqdm(data):
             image_path = os.path.join(self.images_dir, img_id)
             img = image.load_img(image_path, target_size=(224, 224))
             x = image.img_to_array(img)
             x = preprocess_input(x)
-            x_test.append(x)
-        return np.array(x_test)
+            x_images.append(x)
+            x_images_ids.append(img_id)
+        return np.array(x_images), x_images_ids
 
     # calculates f1 score between y_true and y_pred
     def evaluate_f1(self, gt_pairs, candidate_pairs):
@@ -115,21 +117,20 @@ class Chexnet:
             print('ERROR : Candidate does not contain the same number of entries as the ground truth!')
             exit(1)
         for image_key in candidate_pairs:
+
             # Get candidate and GT concepts
-            candidate_concepts = candidate_pairs[image_key].upper()
-            gt_concepts = gt_pairs[image_key].upper()
+            candidate_concepts = candidate_pairs[image_key]
+            gt_concepts = gt_pairs[image_key]
 
             # Split concept string into concept array
             # Manage empty concept lists
-            if gt_concepts.strip() == '':
+            if len(gt_concepts) == 0:
                 gt_concepts = []
-            else:
-                gt_concepts = gt_concepts.split(';')
 
-            if candidate_concepts.strip() == '':
-                candidate_concepts = []
-            else:
+            if len(candidate_concepts) != 0:
                 candidate_concepts = candidate_concepts.split(';')
+            else:
+                candidate_concepts = []
 
             # Manage empty GT concepts (ignore in evaluation)
             if len(gt_concepts) == 0:
@@ -250,28 +251,27 @@ class Chexnet:
         self.chexnet_model(len(self.train_concepts))
         self.model.load_weights(weights_path)
 
-    def chexnet_test(self, model_path=None):
+    def chexnet_test(self, decision_threshold=0.5, model_path=None):
         if model_path is not None:
-            self.load_trained_model(path)
+            self.load_trained_model(model_path)
         print("Loading test images...")
-        test_images = self.load_images()
+        test_images, img_ids = self.load_images_ids(self.test_data)
 
-        # get predictions for dev
-        test_predictions = self.model.predict(test_images, batch_size=16, verbose=1)
+        # get predictions for test
+        test_predictions = self.model.predict(test_images, batch_size=5, verbose=1)
         print("Got predictions for dev set")
         results = {}
         for i in range(len(test_predictions)):
             concepts_pred = []
             for j in range(len(self.train_concepts)):
-                if test_predictions[i, j] >= 0.5:
+                if test_predictions[i, j] >= decision_threshold:
                     concepts_pred.append(self.train_concepts[j])
-            results[self.test_data[i]] = ";".join(concepts_pred)
+            results[img_ids[i]] = ";".join(concepts_pred)
         # evaluate results
-        dev_score = self.evaluate_f1(self.test_data, results)
-        print("The F1 score on dev set is: ", dev_score)
+        test_score = self.evaluate_f1(self.test_data, results)
+        print("The F1 score on test set is: ", test_score)
         # save results
         with open("chexnet_results.csv", "w") as output_file:
             for result in results:
                 output_file.write(result + "\t" + results[result])
                 output_file.write("\n")
-

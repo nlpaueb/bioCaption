@@ -36,13 +36,27 @@ evaluation.compute_WMD()
 ### Providing your own dataset.
 You'll need to provide two tsv files, one for training and one for testing.
 The dataset needs to have the following syntax:
+
+#### For caption generation.
 ```tsv
 img_id_11,img_id_12,img_id13   caption1
 img_id21 caption2
 img_id31,img_31 caption3
 ```
-Please note:
-- There are no spaces after each comma.
-- Between the image ids and the caption there's a tab (/t).
-- Each img_id corresponds to an actual image name stored separately
+- Please note:
+    - There are no spaces after each comma.
+    - Between the image ids and the caption there's a tab (/t).
+    - Each img_id corresponds to an actual image name stored separately
+into an image's folder.
+
+#### For medical image tagging.
+```json
+{
+  "imgid1": ["tag1", "tag2", "tag3"],
+  "imgid2": ["tag1", "tag2"],
+  "imgid3": ["tag1"]....
+}
+```
+- Please note:
+    - Each img_id corresponds to an actual image name stored separately
 into an image's folder.
