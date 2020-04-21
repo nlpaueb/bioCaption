@@ -15,7 +15,7 @@ pip install dist/dc-0.1.tar.gz
 ```
 
 ### Mecical Image Captioning
-####How to use
+#### How to use
 ```python
 from dc.data.downloads import DownloadData
 from dc.models.baselines import Baselines
@@ -29,7 +29,8 @@ baselines = Baselines('iu_xray/train_images.tsv','iu_xray/test_images.tsv','iu_x
 baselines.most_frequent_word_in_captions()
 
 evaluation = Evaluation('iu_xray/test_images.tsv', 'results/most_frequent_word_results.tsv')
-evaluation.compute_WMD()
+evaluation.compute_WMD('embeddings/bio_embeddings.bin')
+evaluation.compute_ms_coco()
 
 ```
 
