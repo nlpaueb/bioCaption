@@ -183,7 +183,7 @@ class Knn:
         print("Found similarities of validation images.")
         max_score, best_k = self.tune_k(images_sims)
         print("Found best score on val:", max_score, "for k =", best_k)
-        self.test_knn(best_k)
+        return best_k
 
     def tune_k(self, images_sims):
         # tune k at validation data

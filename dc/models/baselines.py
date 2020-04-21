@@ -1,6 +1,5 @@
 import os
 import sys
-import pandas as pd
 import numpy as np
 from tqdm import tqdm
 from collections import Counter
@@ -68,7 +67,6 @@ class Baselines:
         test_results = {}
         for index, row in test_data.iterrows():
             test_results[row["image_ids"]] = caption
-
         # Save test results to tsv file
         functions.save_results(test_results, self.results_dir, "most_frequent_word_results")
         return test_results
@@ -94,11 +92,10 @@ class Baselines:
         print("Calculating visual embeddings from train images")
         train_images_vec = {}
         print("Extracting embeddings for all train images...")
-        for train_image_lists in train_data.img_ids_list:
+        for train_image_lists in tqdm(train_data.img_ids_list):
             image_vectors = []
-            for train_image in tqdm(train_image_lists):
+            for train_image in train_image_lists:
                 image_vectors.append(self.image_to_vector(img2vec, train_image))
-
             train_images_vec[','.join(train_image_lists)] = vector_function(np.array(image_vectors))
         print("Got embeddings for train images.")
 
@@ -106,16 +103,16 @@ class Baselines:
         test_data = functions.load_data(self.test_dir)
 
         # Save IDs and raw image vectors separately but aligned
-        ids = [i for i in train_images_vec]
+        ids = list(train_images_vec.keys())
         raw = np.array([train_images_vec[i] for i in train_images_vec])
 
         # Normalize image vectors to avoid normalized cosine and use dot
         raw = raw / np.array([np.sum(raw, 1)] * raw.shape[1]).transpose()
         sim_test_results = {}
 
-        for test_image_ids in test_data.img_ids_list:
+        for test_image_ids in tqdm(test_data.img_ids_list):
             test_vectors = []
-            for test_image in tqdm(test_image_ids):
+            for test_image in test_image_ids:
                 # Get test image embedding
                 test_vectors.append(self.image_to_vector(img2vec, test_image))
             vector = vector_function(np.array(test_vectors))
@@ -126,8 +123,9 @@ class Baselines:
             sims = np.sum(test_mat * raw, 1)
             top1 = np.argmax(sims)
             # Assign the caption of the most similar train image
-            sim_test_results[','.join(test_image_ids)] = train_images[ids[top1]]
+            print(test_image_ids)
+            sim_test_results[test_image_ids] = train_images[ids[top1]]
 
         # Save test results to tsv file
-        functions.save_results(sim_test_results, self.results_dir, "onenn_results.tsv")
+        functions.save_results(sim_test_results, self.results_dir, "onenn_results")
         return sim_test_results

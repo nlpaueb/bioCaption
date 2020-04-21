@@ -225,14 +225,17 @@ class Chexnet:
     def tune_decision_threshold(self):
         pass
 
-    def chexnet(self, batch_size=2, epochs=2):
+    def chexnet(self, batch_size=2, epochs=2, model_path=None):
         num_tags = len(self.train_concepts)
         print(num_tags)
         self.chexnet_model(num_tags)
         # add early stopping
         early_stopping = EarlyStopping(monitor="val_loss", patience=3, mode="auto", restore_best_weights=True)
         # save best model
-        checkpoint = ModelCheckpoint("chexnet_checkpoint.hdf5", monitor="val_loss", save_best_only=True, mode="auto")
+        checkpoint = ModelCheckpoint(os.path.join(model_path, "chexnet_checkpoint.hdf5"),
+                                     monitor="val_loss",
+                                     save_best_only=True,
+                                     mode="auto")
         reduce_lr = ReduceLROnPlateau(monitor='val_loss', factor=0.1, patience=1, verbose=1, mode="min")
         # train the model
         x_train, y_train = self.load_data(self.train_data, self.train_concepts)

@@ -1,5 +1,6 @@
 import os
 import gensim
+import re
 import pandas as pd
 import dc.data.data_functions as functions
 import dc.default_config as config
@@ -9,7 +10,19 @@ from pycocoevalcap.rouge.rouge import Rouge
 from dc.configuration import get_logger
 
 
+def _bioclean(caption):
+    return re.sub('[.,?;*!%^&_+():-\[\]{}]',
+                  '',
+                  caption.replace('"', '')
+                  .replace('/', '')
+                  .replace('\\', '')
+                  .replace("'", '')
+                  .strip()
+                  .lower())
+
+
 class Evaluation:
+
     logger = get_logger()
 
     def __init__(self, gold_dir, results_dir):
@@ -17,6 +30,7 @@ class Evaluation:
         self.gold_dir = gold_dir
         self.gold_data = {}
         self.result_data = {}
+
 
     def _load_data(self):
         gold_csv = pd.read_csv(self.gold_dir, sep="\t", header=None, names=["image_ids", "captions"],
@@ -35,7 +49,7 @@ class Evaluation:
         """
         processed_captions_dict = {}
         for image_id in images_caption_dict:
-            processed_captions_dict[image_id] = [functions._bioclean(images_caption_dict[image_id])]
+            processed_captions_dict[image_id] = [_bioclean(images_caption_dict[image_id])]
         return processed_captions_dict
 
     def compute_WMD(self, bio_path):

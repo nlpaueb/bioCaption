@@ -14,8 +14,8 @@ python3 setup.py sdist
 pip install dist/dc-0.1.tar.gz 
 ```
 
-### How to use
-
+### Mecical Image Captioning
+####How to use
 ```python
 from dc.data.downloads import DownloadData
 from dc.models.baselines import Baselines
@@ -33,11 +33,10 @@ evaluation.compute_WMD()
 
 ```
 
-### Providing your own dataset.
+#### Providing your own dataset.
 You'll need to provide two tsv files, one for training and one for testing.
 The dataset needs to have the following syntax:
 
-#### For caption generation.
 ```tsv
 img_id_11,img_id_12,img_id13   caption1
 img_id21 caption2
@@ -49,14 +48,74 @@ img_id31,img_31 caption3
     - Each img_id corresponds to an actual image name stored separately
 into an image's folder.
 
-#### For medical image tagging.
+#### Results
+Results are saved in the 'results' folder, in a tsv file with the form.
+```tsv
+'img_id_11,img_id_12,img_id13'   caption1
+'img_id21' caption2
+'img_id31,img_31' caption3
+```
+### Medical Image Tagging
+####How to use
+K-NN
+```python
+from dc.data.downloads import DownloadData
+from dc.models.tagModels.knn import Knn
+
+downloads = DownloadData()
+# download the iu_xray dataset in the current directory
+downloads.download_iu_xray()
+
+knn = Knn('iu_xray/tags.json', 'iu_xray/iu_xray_images/', 'results_tag')
+best_k = knn.knn()
+knn.test(best_k)
+```
+
+cheXNet
+```python
+from dc.data.downloads import DownloadData
+from dc.models.tagModels.chexnet import Chexnet
+
+downloads = DownloadData()
+# download the iu_xray dataset in the current directory
+downloads.download_iu_xray()
+
+"""
+Load data and split the into train, test and
+evaluation according to the split ratio.
+"""
+chexnet = Chexnet('iu_xray/tags.json',
+                  'iu_xray/iu_xray_images/',
+                  'results_tag',
+                   split_ratio = [0.6, 0.3, 0.1])
+
+"""
+Train the model and checkpoint to model_path.
+""" 
+chexnet.chexnet(batch_size=2, epochs=2, model_path='iu_xray')
+
+""" While training, chexnet saves the model into the
+instance variable "chexnet.model". If "model_path" is None
+the model stored into chexnet.model is used else
+there's an attempt to load the model from the "model path"
+ """
+chexnet.chexnet_test(decision_threshold=0.5, model_path=None)
+```
+
+#### Input data file.
 ```json
 {
   "imgid1": ["tag1", "tag2", "tag3"],
   "imgid2": ["tag1", "tag2"],
-  "imgid3": ["tag1"]....
+  "imgid3": ["tag1"]
 }
 ```
 - Please note:
     - Each img_id corresponds to an actual image name stored separately
 into an image's folder.
+
+#### Results
+```tsv
+imgid1  tag1;tag1;tag3
+imgid2  tag1;tag2
+```
