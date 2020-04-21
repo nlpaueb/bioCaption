@@ -11,7 +11,7 @@ To install the package locally
 git clone https://github.com/nlpaueb/dc.git
 cd dc
 python3 setup.py sdist
-pip install dist/dc-0.1.tar.gz 
+pip install dist/dc-1.0.tar.gz 
 ```
 
 ### Mecical Image Captioning
