@@ -56,8 +56,7 @@ Results are saved in the 'results' folder, in a tsv file with the form.
 'img_id31,img_31' caption3
 ```
 ### Medical Image Tagging
-####How to use
-K-NN
+#### K-NN
 ```python
 from dc.data.downloads import DownloadData
 from dc.models.tagModels.knn import Knn
@@ -71,7 +70,7 @@ best_k = knn.knn()
 knn.test(best_k)
 ```
 
-cheXNet
+#### cheXNet
 ```python
 from dc.data.downloads import DownloadData
 from dc.models.tagModels.chexnet import Chexnet
