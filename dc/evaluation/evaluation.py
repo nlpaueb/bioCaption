@@ -1,5 +1,6 @@
 import os
 import gensim
+import re
 import pandas as pd
 import dc.data.data_functions as functions
 import dc.default_config as config
@@ -9,7 +10,19 @@ from pycocoevalcap.rouge.rouge import Rouge
 from dc.configuration import get_logger
 
 
+def _bioclean(caption):
+    return re.sub('[.,?;*!%^&_+():-\[\]{}]',
+                  '',
+                  caption.replace('"', '')
+                  .replace('/', '')
+                  .replace('\\', '')
+                  .replace("'", '')
+                  .strip()
+                  .lower())
+
+
 class Evaluation:
+
     logger = get_logger()
 
     def __init__(self, gold_dir, results_dir):
@@ -17,6 +30,7 @@ class Evaluation:
         self.gold_dir = gold_dir
         self.gold_data = {}
         self.result_data = {}
+
 
     def _load_data(self):
         gold_csv = pd.read_csv(self.gold_dir, sep="\t", header=None, names=["image_ids", "captions"],
@@ -35,7 +49,7 @@ class Evaluation:
         """
         processed_captions_dict = {}
         for image_id in images_caption_dict:
-            processed_captions_dict[image_id] = [functions._bioclean(images_caption_dict[image_id])]
+            processed_captions_dict[image_id] = [_bioclean(images_caption_dict[image_id])]
         return processed_captions_dict
 
     def compute_WMD(self, bio_path):
@@ -75,8 +89,8 @@ class Evaluation:
 
         if len(self.gold_data) == len(self.result_data):
             for image in self.gold_data:
-                print(self.gold_data[image])
-                distance = bio.wmdistance(self.gold_data[image][0].split(), self.result_data[image][0].split())
+                self.logger.debug(self.gold_data[image])
+                distance = bio.wmdistance(self.gold_data[image][0], self.result_data[image][0])
                 similarities[image] = (1. / (1. + distance))
                 total_distance = total_distance + distance
                 img_wmds[image] = distance
@@ -87,13 +101,13 @@ class Evaluation:
 
             print("WMD =", wmd, ", WMS =", wms)
         else:
-            self.logger.error("Gold data len={0} and results data len={1} have not equal size"
+            self.logger.error("Gold data len={0} and results data len={1} do not equal size"
                               .format(len(self.gold_data), len(self.result_data)))
 
     def compute_ms_coco(self):
         """Performs the MS COCO evaluation using the Python 3 implementation (https://github.com/salaniz/pycocoevalcap)
         :param gts: Dictionary with the image ids and their gold captions,
-        :param res: Dictionary with the image ids ant their generated captions
+        :param res: Dictionary with the image ids and their generated captions
         :print: Evaluation score (the mean of the scores of all the instances) for each measure
         """
 

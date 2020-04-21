@@ -103,7 +103,6 @@ class DownloadData:
             self._logger.info("Directory {0} already exists".format(dataset_folder_name))
             print("Directory ", dataset_folder_name, " already exists")
 
-
     def _split_images(self, reports_images, img_keys, filename, text_of_reports=None):
         new_images = {}
         if text_of_reports is None:
