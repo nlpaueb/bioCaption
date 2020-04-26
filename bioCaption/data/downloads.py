@@ -4,10 +4,10 @@ import random
 import requests
 import numpy as np
 import xml.etree.ElementTree as ElementTree
-import dc.configuration as conf
+import bioCaption.configuration as conf
 from os.path import join as path_join, abspath
 from bs4 import BeautifulSoup
-import dc.default_config as config
+import bioCaption.default_config as config
 
 
 def download_bio_embeddings(path):

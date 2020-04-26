@@ -17,9 +17,9 @@ pip install dist/dc-1.0.tar.gz
 ### Mecical Image Captioning
 #### How to use
 ```python
-from dc.data.downloads import DownloadData
-from dc.models.captionModels.baselines import Baselines
-from dc.models.captionModels.caption_models_evaluation import CaptionsEvaluation
+from bioCaption.data.downloads import DownloadData
+from bioCaption.models.captionModels.baselines import Baselines
+from bioCaption.models.captionModels.caption_models_evaluation import CaptionsEvaluation
 
 downloads = DownloadData()
 # download the iu_xray dataset in the current directory
@@ -63,8 +63,8 @@ Results are saved in the 'results' folder, in a tsv file with the form.
 ### Medical Image Tagging
 #### K-NN
 ```python
-from dc.data.downloads import DownloadData
-from dc.models.tagModels.knn import Knn
+from bioCaption.data.downloads import DownloadData
+from bioCaption.models.tagModels.knn import Knn
 
 downloads = DownloadData()
 # download the iu_xray dataset in the current directory
@@ -77,8 +77,8 @@ knn.test(best_k)
 
 #### cheXNet
 ```python
-from dc.data.downloads import DownloadData
-from dc.models.tagModels.chexnet import Chexnet
+from bioCaption.data.downloads import DownloadData
+from bioCaption.models.tagModels.chexnet import Chexnet
 
 downloads = DownloadData()
 # download the iu_xray dataset in the current directory

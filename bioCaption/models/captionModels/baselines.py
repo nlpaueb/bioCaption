@@ -5,7 +5,7 @@ from tqdm import tqdm
 from collections import Counter
 from img2vec_pytorch import Img2Vec
 from PIL import Image
-import dc.models.captionModels.utils as utils
+import bioCaption.models.captionModels.utils as utils
 
 
 sys.path.append("..")  # Adds higher directory to python modules path.

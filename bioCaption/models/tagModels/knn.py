@@ -9,7 +9,7 @@ from keras.applications.densenet import DenseNet121
 from keras.models import Model
 import keras.applications.densenet as densenet
 from keras.preprocessing import image
-from dc.models.tagModels.tag_models_evaluation import TagsEvaluation
+from bioCaption.models.tagModels.tag_models_evaluation import TagsEvaluation
 
 sys.path.append("..")  # Adds higher directory to python modules path.
 

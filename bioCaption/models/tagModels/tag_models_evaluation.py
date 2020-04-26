@@ -2,7 +2,7 @@ import os
 import sys
 import json
 from sklearn.metrics import f1_score
-from dc.configuration import get_logger
+from bioCaption.configuration import get_logger
 
 
 class TagsEvaluation:
@@ -94,5 +94,5 @@ class TagsEvaluation:
         return mean_f1_score
 
 
-f1 = TagsEvaluation(gold_dir='/home/mary/Documents/Projects/dc/iu_xray/tags.json', results_dir='/home/mary/Documents/Projects/dc/results_knn.json')
+f1 = TagsEvaluation(gold_dir='/home/mary/Documents/Projects/bioCaption/iu_xray/tags.json', results_dir='/home/mary/Documents/Projects/bioCaption/results_knn.json')
 f1.evaluate_f1()

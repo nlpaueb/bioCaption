@@ -2,12 +2,12 @@ import os
 import gensim
 import re
 import pandas as pd
-from dc.data.downloads import download_bio_embeddings
+from bioCaption.data.downloads import download_bio_embeddings
 import json
 from pycocoevalcap.bleu.bleu import Bleu
 from pycocoevalcap.meteor.meteor import Meteor
 from pycocoevalcap.rouge.rouge import Rouge
-from dc.configuration import get_logger
+from bioCaption.configuration import get_logger
 
 
 def _bioclean(caption):

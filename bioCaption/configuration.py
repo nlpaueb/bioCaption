@@ -1,5 +1,5 @@
 import logging
-from dc import default_config as config
+from bioCaption import default_config as config
 
 
 def get_logger():
