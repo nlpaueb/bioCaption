@@ -18,8 +18,8 @@ pip install dist/dc-1.0.tar.gz
 #### How to use
 ```python
 from dc.data.downloads import DownloadData
-from dc.models.baselines import Baselines
-from dc.evaluation.evaluation import Evaluation
+from dc.models.captionModels.baselines import Baselines
+from dc.models.captionModels.caption_models_evaluation import CaptionsEvaluation
 
 downloads = DownloadData()
 # download the iu_xray dataset in the current directory
@@ -28,10 +28,12 @@ downloads.download_iu_xray()
 baselines = Baselines('iu_xray/train_images.tsv','iu_xray/test_images.tsv','iu_xray/iu_xray_images/','results')
 baselines.most_frequent_word_in_captions()
 
-evaluation = Evaluation('iu_xray/test_images.tsv', 'results/most_frequent_word_results.tsv')
-evaluation.compute_WMD('embeddings/bio_embeddings.bin')
-evaluation.compute_ms_coco()
+evaluation = CaptionsEvaluation('iu_xray/test_images.tsv', 'results/most_frequent_word_results.tsv')
 
+# if the directory "embeddings" does not exits, it will be created
+# and the embeddings will be downloaded there.
+evaluation.compute_WMD('embeddings/', embeddings_file="pubmed2018_w2v_200D.bin")
+evaluation.compute_ms_coco()
 ```
 
 #### Providing your own dataset.
@@ -51,10 +53,12 @@ into an image's folder.
 
 #### Results
 Results are saved in the 'results' folder, in a tsv file with the form.
-```tsv
-'img_id_11,img_id_12,img_id13'   caption1
-'img_id21' caption2
-'img_id31,img_31' caption3
+```json
+{
+  "imgid1,imgid2": "caption1",
+  "imgid3": "caption2",
+  "imgid4,imgid5": "caption3"
+}
 ```
 ### Medical Image Tagging
 #### K-NN
@@ -115,7 +119,10 @@ chexnet.chexnet_test(decision_threshold=0.5, model_path=None)
 into an image's folder.
 
 #### Results
-```tsv
-imgid1  tag1;tag1;tag3
-imgid2  tag1;tag2
+```json
+{
+  "imgid1": ["tag1", "tag2", "tag3"],
+  "imgid2": ["tag1", "tag2"],
+  "imgid3": ["tag1"]
+}
 ```

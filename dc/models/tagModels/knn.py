@@ -9,7 +9,7 @@ from keras.applications.densenet import DenseNet121
 from keras.models import Model
 import keras.applications.densenet as densenet
 from keras.preprocessing import image
-from sklearn.metrics import f1_score
+from dc.models.tagModels.tag_models_evaluation import TagsEvaluation
 
 sys.path.append("..")  # Adds higher directory to python modules path.
 
@@ -35,6 +35,11 @@ class Knn:
         self.split_ratio = split_ratio
         if not os.path.exists(self.results_dir):
             os.makedirs(self.results_dir)
+
+    def f1_evaluation(self, gt_pairs, candidate_pairs):
+        f1 = TagsEvaluation(gold_data=gt_pairs,
+                            result_data=candidate_pairs)
+        return f1.evaluate_f1()
 
     def _create_dataset(self, path):
         with open(path) as json_file:
@@ -76,75 +81,6 @@ class Knn:
             train_images_vec[train_image] = vec
             print("Got embeddings for train images.")
         return train_images_vec
-
-    def evaluate_f1(self, gt_pairs, candidate_pairs):
-        # Concept stats
-        min_concepts = sys.maxsize
-        max_concepts = 0
-        total_concepts = 0
-        concepts_distrib = {}
-
-        # Define max score and current score
-        max_score = len(gt_pairs)
-        current_score = 0
-
-        # Check there are the same number of pairs between candidate and ground truth
-        if len(candidate_pairs) != len(gt_pairs):
-            print('ERROR : Candidate does not contain the same number of entries as the ground truth!')
-            exit(1)
-
-        # Evaluate each candidate concept list against the ground truth
-        for image_key in candidate_pairs:
-
-            # Get candidate and GT concepts
-            candidate_concepts = candidate_pairs[image_key]
-            gt_concepts = gt_pairs[image_key]
-
-            # Split concept string into concept array
-            # Manage empty concept lists
-            if len(gt_concepts) == 0:
-                gt_concepts = []
-
-            if len(candidate_concepts) != 0:
-                candidate_concepts = candidate_concepts.split(';')
-            else:
-                candidate_concepts = []
-
-            # Manage empty GT concepts (ignore in evaluation)
-            if len(gt_concepts) == 0:
-                max_score -= 1
-                # Normal evaluation
-            else:
-                # Concepts stats
-                total_concepts += len(gt_concepts)
-
-                # Global set of concepts
-                all_concepts = sorted(list(set(gt_concepts + candidate_concepts)))
-
-                # Calculate F1 score for the current concepts
-                y_true = [int(concept in gt_concepts) for concept in all_concepts]
-                y_pred = [int(concept in candidate_concepts) for concept in all_concepts]
-
-                f1score = f1_score(y_true, y_pred, average='binary')
-
-                # Increase calculated score
-                current_score += f1score
-
-            # Concepts stats
-            nb_concepts = str(len(gt_concepts))
-            if nb_concepts not in concepts_distrib:
-                concepts_distrib[nb_concepts] = 1
-            else:
-                concepts_distrib[nb_concepts] += 1
-
-            if len(gt_concepts) > max_concepts:
-                max_concepts = len(gt_concepts)
-
-            if len(gt_concepts) < min_concepts:
-                min_concepts = len(gt_concepts)
-
-                mean_f1_score = current_score / max_score
-        return mean_f1_score
 
     def knn(self):
         self._create_dataset(self.data_dir)
@@ -204,7 +140,7 @@ class Knn:
                 val_results[image_sim] = ";".join(
                     f[0] for f in frequent_concepts)  # process to match competition evaluation
             # evaluate k-nn for this k and if better, update the max score
-            score = self.evaluate_f1(self.val_data, val_results)
+            score = self.f1_evaluation(self.val_data, val_results)
             if score > max_score:
                 max_score = score
                 best_k = k
@@ -236,12 +172,12 @@ class Knn:
                 for concept in concepts:
                     concepts_list.append(concept)
             frequent_concepts = Counter(concepts_list).most_common(round(sum_concepts / best_k))
-            sim_test_results[test_image] = ";".join(f[0] for f in frequent_concepts)
+            sim_test_results[test_image] = [f[0] for f in frequent_concepts]
         print("Saving test results...")
-        with open(os.path.join(self.results_dir,"results_knn.csv"), 'w') as output_file:
-            for result in sim_test_results:
-                output_file.write(result + "\t" + sim_test_results[result])
-                output_file.write("\n")
+        # save results
+        with open(os.path.join(self.results_dir, 'results_knn.json'), 'w') as json_file:
+            json.dump(sim_test_results, json_file)
+
 
 
 

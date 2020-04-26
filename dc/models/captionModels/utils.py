@@ -1,7 +1,6 @@
 import os
 import re
 import json
-import math
 import numpy as np
 import pandas as pd
 
@@ -37,16 +36,11 @@ def load_data(data_dir):
 
 
 def save_results(results_dictionary, results_dir, file_name):
-    # Save test results to tsv file
-    df = pd.DataFrame.from_dict(results_dictionary, orient="index")
-    df.to_csv(os.path.join(results_dir, file_name+".tsv"), sep="\t", header=False)
+    # Save test results to json file
+    with open(os.path.join(results_dir, file_name), 'w') as json_file:
+        json.dump(results_dictionary, json_file)
 
 
-def download_bio_embeddings(path):
-    os.system("wget "+"-P "+path+" https://archive.org/download/pubmed2018_w2v_200D.tar/pubmed2018_w2v_200D.tar.gz")
-    # Unzip word embeddings
-    os.system("tar xvzf pubmed2018_w2v_200D.tar.gz")
-    os.system("rm  pubmed2018_w2v_200D.tar.gz")
 
 
 
