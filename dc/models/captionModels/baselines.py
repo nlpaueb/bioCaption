@@ -68,7 +68,7 @@ class Baselines:
         for index, row in test_data.iterrows():
             test_results[row["image_ids"]] = caption
         # Save test results to tsv file
-        utils.save_results(test_results, self.results_dir, "most_frequent_word_results")
+        utils.save_results(test_results, self.results_dir, "most_frequent_word_results.json")
         return test_results
 
     def one_nn(self, vector_function = utils.average_embedding, cuda=False):
@@ -123,9 +123,8 @@ class Baselines:
             sims = np.sum(test_mat * raw, 1)
             top1 = np.argmax(sims)
             # Assign the caption of the most similar train image
-            print(test_image_ids)
             sim_test_results[test_image_ids] = train_images[ids[top1]]
 
         # Save test results to tsv file
-        utils.save_results(sim_test_results, self.results_dir, "onenn_results")
+        utils.save_results(sim_test_results, self.results_dir, "onenn_results.json")
         return sim_test_results

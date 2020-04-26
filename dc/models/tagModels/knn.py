@@ -175,7 +175,7 @@ class Knn:
             sim_test_results[test_image] = [f[0] for f in frequent_concepts]
         print("Saving test results...")
         # save results
-        with open('results_knn.json', 'w') as json_file:
+        with open(os.path.join(self.results_dir, 'results_knn.json'), 'w') as json_file:
             json.dump(sim_test_results, json_file)
 
 

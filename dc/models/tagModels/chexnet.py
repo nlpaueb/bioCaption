@@ -213,5 +213,5 @@ class Chexnet:
         test_score = self.f1_evaluation(self.test_data, results)
         print("The F1 score on test set is: ", test_score)
         # save results
-        with open('chexnet_results.json', 'w') as json_file:
+        with open(os.path.join(self.results_dir, 'chexnet_results.json'), 'w') as json_file:
             json.dump(results, json_file)
