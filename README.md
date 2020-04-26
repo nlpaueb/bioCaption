@@ -8,10 +8,7 @@ of the North American Chapter of the Association for Computational Linguistics (
 ### Install
 To install the package locally
 ```
-git clone https://github.com/nlpaueb/dc.git
-cd dc
-python3 setup.py sdist
-pip install dist/dc-1.0.tar.gz 
+pip install bioCaption
 ```
 
 ### Mecical Image Captioning
