@@ -18,8 +18,8 @@ pip install dist/dc-1.0.tar.gz
 #### How to use
 ```python
 from dc.data.downloads import DownloadData
-from dc.models.baselines import Baselines
-from dc.evaluation.evaluation import Evaluation
+from dc.models.captionModels.baselines import Baselines
+from dc.models.captionModels.caption_models_evaluation import Evaluation
 
 downloads = DownloadData()
 # download the iu_xray dataset in the current directory

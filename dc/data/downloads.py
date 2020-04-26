@@ -10,8 +10,15 @@ from bs4 import BeautifulSoup
 import dc.default_config as config
 
 
-class DownloadData:
+def download_bio_embeddings(path):
+    os.system(
+        "wget " + "-P " + path + " https://archive.org/download/pubmed2018_w2v_200D.tar/pubmed2018_w2v_200D.tar.gz")
+    # Unzip word embeddings
+    os.system("tar xvzf pubmed2018_w2v_200D.tar.gz")
+    os.system("rm  pubmed2018_w2v_200D.tar.gz")
 
+
+class DownloadData:
     _logger = conf.get_logger()
 
     def __init__(self, dataset_path=config.DOWNLOAD_PATH):
@@ -276,4 +283,3 @@ class DownloadData:
                 print("Extracted", image_sum, "image-caption pairs from the",
                       category_soup.find("li", class_="selected").find("a").get_text(), "category")
                 return image_captions, image_tags
-

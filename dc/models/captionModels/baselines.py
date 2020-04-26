@@ -5,7 +5,7 @@ from tqdm import tqdm
 from collections import Counter
 from img2vec_pytorch import Img2Vec
 from PIL import Image
-import dc.data.data_functions as functions
+import dc.models.captionModels.utils as utils
 
 
 sys.path.append("..")  # Adds higher directory to python modules path.
@@ -45,8 +45,8 @@ class Baselines:
         """
 
         # load train data to find most frequent words
-        train_data = functions.load_data(self.train_dir)
-        train_data = functions.get_list_of_words_per_caption(train_data)
+        train_data = utils.load_data(self.train_dir)
+        train_data = utils.get_list_of_words_per_caption(train_data)
         caption_words = train_data['split_captions'].to_list()
         caption_words = [word for caption_list in caption_words for word in caption_list]
 
@@ -62,16 +62,16 @@ class Baselines:
         print("The caption of most frequent words is:", caption)
 
         # Load test data and assign the frequency caption to every image to create results
-        test_data = functions.load_data(self.test_dir)
+        test_data = utils.load_data(self.test_dir)
         # Dictionary to save the test image ids and the frequency caption
         test_results = {}
         for index, row in test_data.iterrows():
             test_results[row["image_ids"]] = caption
         # Save test results to tsv file
-        functions.save_results(test_results, self.results_dir, "most_frequent_word_results")
+        utils.save_results(test_results, self.results_dir, "most_frequent_word_results")
         return test_results
 
-    def one_nn(self, vector_function = functions.average_embedding, cuda=False):
+    def one_nn(self, vector_function = utils.average_embedding, cuda=False):
         """
         Nearest Neighbor Baseline: Img2Vec library (https://github.com/christiansafka/img2vec/) is used to obtain
         image embeddings, extracted from ResNet-18. For each test image the cosine similarity with all the training images
@@ -86,7 +86,7 @@ class Baselines:
         img2vec = Img2Vec(cuda=cuda)
 
         # Load train data
-        train_data = functions.load_data(self.train_dir)
+        train_data = utils.load_data(self.train_dir)
         train_images = dict(zip(train_data.image_ids, train_data.caption))
 
         print("Calculating visual embeddings from train images")
@@ -100,7 +100,7 @@ class Baselines:
         print("Got embeddings for train images.")
 
         # Load test data
-        test_data = functions.load_data(self.test_dir)
+        test_data = utils.load_data(self.test_dir)
 
         # Save IDs and raw image vectors separately but aligned
         ids = list(train_images_vec.keys())
@@ -127,5 +127,5 @@ class Baselines:
             sim_test_results[test_image_ids] = train_images[ids[top1]]
 
         # Save test results to tsv file
-        functions.save_results(sim_test_results, self.results_dir, "onenn_results")
+        utils.save_results(sim_test_results, self.results_dir, "onenn_results")
         return sim_test_results

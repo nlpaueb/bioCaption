@@ -2,7 +2,7 @@ import os
 import gensim
 import re
 import pandas as pd
-import dc.data.data_functions as functions
+from dc.data.downloads import download_bio_embeddings
 import dc.default_config as config
 from pycocoevalcap.bleu.bleu import Bleu
 from pycocoevalcap.meteor.meteor import Meteor
@@ -21,7 +21,7 @@ def _bioclean(caption):
                   .lower())
 
 
-class Evaluation:
+class CaptionsEvaluation:
 
     logger = get_logger()
 
@@ -30,7 +30,7 @@ class Evaluation:
         self.gold_dir = gold_dir
         self.gold_data = {}
         self.result_data = {}
-
+        self.result_data = {}
 
     def _load_data(self):
         gold_csv = pd.read_csv(self.gold_dir, sep="\t", header=None, names=["image_ids", "captions"],
@@ -78,7 +78,7 @@ class Evaluation:
         if not os.path.exists(bio_path):
             self.logger.info("Bio embeddings do not exists. Will try to download them "
                              "in {0}".format(config.DOWNLOAD_PATH + "/" + bio_path))
-            functions.download_bio_embeddings(bio_path)
+            download_bio_embeddings(bio_path)
 
         bio = gensim.models.KeyedVectors.load_word2vec_format(bio_path, binary=True)
 
