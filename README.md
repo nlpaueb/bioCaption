@@ -1,4 +1,4 @@
-# DC - Diagnostic Captioning
+# bioCaption - Diagnostic Captioning
 Based on [A Survey on Biomedical Image Captioning](https://www.aclweb.org/anthology/W19-1803).
 
 > V. Kougia, J. Pavlopoulos and I Androutsopoulos, "A Survey on Biomedical Image Captioning". 
@@ -6,7 +6,7 @@ Proceedings of the Workshop on Shortcomings in Vision and Language of the Annual
 of the North American Chapter of the Association for Computational Linguistics (NAACL-HLT 2019), Minneapolis, USA, 2019.
 
 ### Install
-To install the package locally
+To install the package
 ```
 pip install bioCaption
 ```
