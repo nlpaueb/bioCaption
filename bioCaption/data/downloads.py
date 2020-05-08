@@ -275,9 +275,9 @@ class DownloadData:
                         break
 
                     # go to the next page
-                    page_url = base_url + "/" + page_soup.find("a", rel="next").get("href")
+                    page_url = base_url + "/" + page_parser.find("a", rel="next").get("href")
                     page = requests.get(page_url)
-                    page_soup = BeautifulSoup(page.content, "html.parser")
+                    page_parser = BeautifulSoup(page.content, "html.parser")
 
                 print("Visited", i - 1, "pages of Gross sub-collection")
                 print("Extracted", image_sum, "image-caption pairs from the",
