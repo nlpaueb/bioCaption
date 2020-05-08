@@ -9,7 +9,7 @@ with open(path.join(here, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 setup(
       name='bioCaption',  # Required
-      version='1.0',
+      version='1.0.2',
       description='Diagnostic Captioning',
       url='https://github.com/nlpaueb/dc',
       author='nlpaueb',
@@ -21,5 +21,5 @@ setup(
       keywords='diagnostic image captioning machine learning',
       packages=find_packages(),
       python_requires='>=3.6',
-      install_requires=['bs4', 'pandas', 'img2vec_pytorch', 'gensim', 'Cython', 'pycocoevalcap'],
+      install_requires=['bs4'],
 )
