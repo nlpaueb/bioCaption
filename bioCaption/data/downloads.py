@@ -179,7 +179,7 @@ class DownloadData:
 
     def _download_dataset(self, dataset):
         self._logger.info("Downloading {0}".format(dataset))
-        if dataset is 'iu_xray':
+        if dataset == 'iu_xray':
             os.system("wget -P iu_xray/ https://openi.nlm.nih.gov/imgs/collections/NLMCXR_png.tgz")
             # data reports
             os.system("wget -P iu_xray/ https://openi.nlm.nih.gov/imgs/collections/NLMCXR_reports.tgz")
