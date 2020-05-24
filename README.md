@@ -1,10 +1,49 @@
 # bioCaption - Diagnostic Captioning
-Based on [A Survey on Biomedical Image Captioning](https://www.aclweb.org/anthology/W19-1803).
 
-> V. Kougia, J. Pavlopoulos and I Androutsopoulos, "A Survey on Biomedical Image Captioning". 
-Proceedings of the Workshop on Shortcomings in Vision and Language of the Annual Conference 
-of the North American Chapter of the Association for Computational Linguistics (NAACL-HLT 2019), Minneapolis, USA, 2019.
+# Datasets
 
+We provide scripts for downloading IU X-ray and Peir Gross. Both datasets can be used for captioning, while IU X-ray can also be used for tagging.
+
+
+#### IU X-ray
+IU X-ray (Demner-Fushman et al., 2015) is provided by the Open Access Biomedical Image Search Engine (OpenI) and it consists of radiology examinations (cases). Each case corresponds to one or more images, one radiology report and two sets of tags. The reports have 4 sections: Comparison, Indication, Findings and Impression, of which Findings and Impression can be used for captioning. There are two types of tags: the MTI tags, which are extracted from the text by the Medical Text Indexer and the manual tags, which are assigned by two trained coders. In total, there are 3,955 reports with 7,470 frontal and lateral X-rays.
+
+#### Peir Gross
+This dataset was first used for captioning by Jing et al. (2018). It consists of photographs of medical incidents provided by the Pathology Education Informational Resource (PEIR) digital library for use in medical education. There are 7,443 images extracted from the Gross collections of 21 PEIR pathology sub-categories, each associated with a caption. Each caption is a single descriptive sentence.
+
+
+# Tagging
+
+#### Mean@k-NN
+Mean@k-NN uses an image retrieval method to assign tags to images by computing cosine similarities between image embeddings. Given a test image, this system retrieves the k most similar training images and their tags. The most frequent tags of the retrieved images are assigned to the test image. The average number of tags per retrieved image is calculated to decide how many tags will be assigned to the test image. The value of k is tuned on validation data.
+
+
+####  TagCXN (also called ConceptCXN)
+This system performs multi-label classification. It uses the DenseNet-121 CNN as an image encoder. The image embeddings are extracted from the last average pooling layer of the encoder and passed through a dense layer that produces a probability for each tag. At test time, first, the threshold that is used to assign tags to an image is tuned on validation data. Then, the tags that have a probability that exceeds the resulting threshold are assigned to each test image.
+
+
+# Captioning
+
+#### Frequency Baseline
+This baseline uses the most frequent words in the training set to form a caption. This caption is then assigned to every test image. The length of the caption is the average length of the training captions.
+
+#### Nearest Neighbour Baseline (1-NN)
+1-NN uses cosine similarity to find the training image that is the most similar to a test image and assigns the retrieved training caption to the test image. The images are encoded by a CNN and their image embedding extracted from a layer of the encoder is used.
+
+
+___The datasets and captioning models are described in detail in "A Survey on Biomedical Image Captioning". The tagging models were used for the participation of AUEB NLP Group in the ImageCLEFmed 2019 Concept Prediction task, where they achieved the best performance. More detail can be found in the systems description paper.___
+
+#### References
+
+V. Kougia, J. Pavlopoulos and I. Androutsopoulos, "A Survey on Biomedical Image Captioning". Proceedings of the Workshop on Shortcomings in Vision and Language of the Annual Conference of the North American Chapter of the Association for Computational Linguistics (NAACL-HLT 2019), Minneapolis, USA, pp. 26-36, 2019.
+
+V. Kougia, J. Pavlopoulos and I. Androutsopoulos, "AUEB NLP Group at ImageCLEFmed Caption 2019". Working Notes of the Conference and Labs of the Evaluation Forum (CLEF 2019), Lugano, Switzerland, 2019.
+
+B. Jing,  P. Xie, E. Xing, “On the Automatic Generation of Medical Imaging Reports”. Proceedings of the 56th Annual Meeting of the Association for Computational Linguistics(Long Papers), Melbourne, Australia, pp. 2577–2586, 2018.
+
+D. Demner-Fushman, M. D. Kohli, M. B. Rosenman,S. E. Shooshan, L. Rodriguez, S. Antani, G. R.Thoma, and C. J. McDonald, “Preparing a collection of radiology examinations for distribution and retrieval”. Journal of the American Medical In-formatics Association, 23(2):304–310, 2015.
+<br><br><br>
+# Practical Guide
 ### Install
 To install the package
 ```

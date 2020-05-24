@@ -11,6 +11,10 @@ import bioCaption.default_config as config
 
 
 def download_bio_embeddings(path):
+    """
+    :param path: path where the embeddings file will be downloaded.
+    :return:
+    """
     os.system(
         "wget " + "-P " + path + " https://archive.org/download/pubmed2018_w2v_200D.tar/pubmed2018_w2v_200D.tar.gz")
     # Unzip word embeddings
@@ -27,8 +31,8 @@ class DownloadData:
     def download_iu_xray(self, split_rate=0.8):
         """Downloads the iu_xray dataset
         :param split_rate: Percentage of the dataset to be kept as training.
-        :return: Writes a folder with the dataset name, in the current working
-        directory with the dataset.
+        :return: A folder with the dataset name is created in the current
+        working directory and the dataset is stored there.
         """
         dataset_name = 'iu_xray'
 
@@ -86,8 +90,8 @@ class DownloadData:
     def download_peir_gross(self, split_rate=0.9):
         """Downloads the peir_gross dataset
         :param split_rate: Percentage of the dataset to be kept as training.
-        :return: Writes a folder with the dataset name, in the current working
-        directory with the dataset.
+        :return: A folder with the dataset name is created in the current
+        working directory and the dataset is stored there.
         """
         dataset_name = 'peir_gross'
         self._create_directory_for_dataset(dataset_name)

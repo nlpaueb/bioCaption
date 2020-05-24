@@ -16,12 +16,14 @@ sys.path.append("..")  # Adds higher directory to python modules path.
 
 class Knn:
 
-    def __init__(self, data_dir, images_dir, results_dir, split_ratio=[0.6, 0.3, 0.1]):
+    def __init__(self, data_path, images_dir, results_dir, split_ratio=[0.6, 0.3, 0.1]):
         """
-        :param train_dir: The directory to the train data tsv file with the form: "[image1,image2] \t caption"
-        :param test_dir: The directory to the test data tsv file with the form: "[image1, imager2] \t caption"
+        :param data_path: Path to json training data file.
         :param images_dir: : The folder in the dataset that contains the images
          with the form: "[dataset_name]_images".
+        :param split_ratio: List of floats that represents the ratios of the
+        dataset to be used as train, test and validation. The default value is
+        [0.5, 0.4, 0.1]. The ratios must always sum to 1.0.
         :param results_dir: The folder in which to save the results file
         """
         self.images_dir = images_dir
@@ -29,7 +31,7 @@ class Knn:
         self.train_data = {}
         self.test_data = {}
         self.val_data = {}
-        self.data_dir = data_dir
+        self.data_path = data_path
         self.ids = []
         self.raw = []
         self.split_ratio = split_ratio
@@ -83,7 +85,11 @@ class Knn:
         return train_images_vec
 
     def knn(self):
-        self._create_dataset(self.data_dir)
+        """
+        :return: Returns an integer K that represents the best k distance for
+        the given data, based on F1 evaluation of the validation data.
+        """
+        self._create_dataset(self.data_path)
         base_model = DenseNet121(weights='imagenet', include_top=True)
         vector_extraction_model = \
             Model(inputs=base_model.input, outputs=base_model.get_layer("avg_pool").output)
@@ -126,20 +132,19 @@ class Knn:
         best_k = 1
         max_score = 0
         for k in tqdm(range(1, 201)):
-            val_results = {}  # store validation images and their predicted concepts
+            val_results = {}
             for image_sim in images_sims:
-                topk = np.argsort(images_sims[image_sim])[-k:]  # get the k most similar images
-                concepts_list = []  # store the concepts for that image
-                sum_concepts = 0  # store total num of concepts in the k images
-                for index in topk:  # for each similar image update the concept list (of the test image in question)
+                topk = np.argsort(images_sims[image_sim])[-k:]
+                concepts_list = []
+                sum_concepts = 0
+                for index in topk:
                     concepts = self.train_data[self.ids[index]]
                     sum_concepts += len(concepts)
                     for concept in concepts:
                         concepts_list.append(concept)
                 frequent_concepts = Counter(concepts_list).most_common(round(sum_concepts / k))
                 val_results[image_sim] = ";".join(
-                    f[0] for f in frequent_concepts)  # process to match competition evaluation
-            # evaluate k-nn for this k and if better, update the max score
+                    f[0] for f in frequent_concepts)
             score = self.f1_evaluation(self.val_data, val_results)
             if score > max_score:
                 max_score = score
@@ -147,6 +152,9 @@ class Knn:
         return max_score, best_k
 
     def test_knn(self, best_k):
+        """
+        :param best_k: Integer that represent the K distance.
+        """
         base_model = DenseNet121(weights='imagenet', include_top=True)
         vector_extraction_model = \
             Model(inputs=base_model.input, outputs=base_model.get_layer("avg_pool").output)
