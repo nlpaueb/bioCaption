@@ -4,6 +4,7 @@ import os
 import sys
 
 import numpy as np
+import pandas as pd
 from keras.applications.densenet import DenseNet121
 from keras.applications.densenet import preprocess_input
 from keras.callbacks import EarlyStopping, ModelCheckpoint, ReduceLROnPlateau
@@ -172,9 +173,6 @@ class Chexnet:
                       metrics=["binary_accuracy"])
         self.model = model
 
-    def tune_decision_threshold(self):
-        pass
-
     def chexnet(self, batch_size=100, epochs=2, model_path=None):
         """
         Train the chexnet model for medical image tagging.
@@ -214,7 +212,7 @@ class Chexnet:
         self.chexnet_model(len(self.train_concepts))
         self.model.load_weights(weights_path)
 
-    def chexnet_test(self, decision_threshold=0.5, model_path=None):
+    def chexnet_test(self, decision_threshold=0.5, model_path=None, save_results=True):
         """
 
         :param decision_threshold: Decision threshold for chexnet classifier.
@@ -235,16 +233,31 @@ class Chexnet:
                                               verbose=1)
         print("Got predictions for dev set")
         results = {}
+        results_json = {}
         for i in range(len(test_predictions)):
             concepts_pred = []
             for j in range(len(self.train_concepts)):
                 if test_predictions[i, j] >= decision_threshold:
                     concepts_pred.append(self.train_concepts[j])
-            results[img_ids[i]] = ";".join(concepts_pred)
+            if save_results:
+                results_json[img_ids[i]] = ";".join(concepts_pred)
+            results[img_ids[i]] = concepts_pred
         # evaluate results
         test_score = self.f1_evaluation(self.test_data, results)
         print("The F1 score on test set is: ", test_score)
         # save results
-        with open(os.path.join(self.results_dir, 'chexnet_results.json'),
-                  'w') as json_file:
-            json.dump(results, json_file)
+        if save_results:
+            with open(os.path.join(self.results_dir, 'chexnet_results.json'),
+                      'w') as json_file:
+                json.dump(results_json, json_file)
+        return results
+
+    def chexnet_ensemple(self, checkpoints_directory):
+        ensemble_models_results = {}
+        checkpoints = os.listdir(checkpoints_directory)
+        for checkpoint in checkpoints:
+            model_path = os.path.join(checkpoints_directory, checkpoint)
+            results = self.chexnet_test(model_path=model_path)
+            ensemble_models_results[checkpoint] = results
+        df = pd.DataFrame(ensemble_models_results)
+
