@@ -287,3 +287,4 @@ class DownloadData:
                 print("Extracted", image_sum, "image-caption pairs from the",
                       category_soup.find("li", class_="selected").find("a").get_text(), "category")
                 return image_captions, image_tags
+

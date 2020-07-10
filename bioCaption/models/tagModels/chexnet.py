@@ -2,7 +2,6 @@ import json
 import math
 import os
 import sys
-
 import numpy as np
 import pandas as pd
 from keras.applications.densenet import DenseNet121
@@ -12,6 +11,7 @@ from keras.initializers import glorot_uniform
 from keras.layers import Dense
 from keras.models import Model
 from keras.preprocessing import image
+from functools import reduce
 from tqdm import tqdm
 
 from bioCaption.models.tagModels.tag_models_evaluation import TagsEvaluation
@@ -253,11 +253,32 @@ class Chexnet:
         return results
 
     def chexnet_ensemple(self, checkpoints_directory):
+        checkpoints = {
+            "1_DRAN_tagCXN_checkpoint": 0.34,
+            "2_DRAN_tagCXN_checkpoint": 0.7,
+            "1_DRCO_tagCXN_checkpoint": 0.14,
+            "2_DRCO_tagCXN_checkpoint": 0.08,
+            "1_DRCT_tagCXN_checkpoint": 0.73,
+            "2_DRCT_tagCXN_checkpoint": 0.5,
+            "1_DRMR_tagCXN_checkpoint": 0.28,
+            "2_DRMR_tagCXN_checkpoint": 0.98,
+            "1_DRPE_tagCXN_checkpoint": 0.3,
+            "2_DRPE_tagCXN_checkpoint": 0.23,
+            "1_DRUS_tagCXN_checkpoint": 0.18,
+            "2_DRUS_tagCXN_checkpoint": 0.22,
+            "1_DRXR_tagCXN_checkpoint": 0.45,
+            "2_DRXR_tagCXN_checkpoint": 0.86
+        }
+
         ensemble_models_results = {}
         checkpoints = os.listdir(checkpoints_directory)
         for checkpoint in checkpoints:
             model_path = os.path.join(checkpoints_directory, checkpoint)
-            results = self.chexnet_test(model_path=model_path)
+            threshold = checkpoints[checkpoint.replace(".hdf5", "")];
+            results = self.chexnet_test(model_path=model_path, decision_threshold=threshold)
             ensemble_models_results[checkpoint] = results
         df = pd.DataFrame(ensemble_models_results)
+        df.assign(intersection=df.transform(lambda x:
+                                            list(reduce(set.intersection, map(set, x.tolist()[1:]))), axis=1))
 
+        df.to_csv('checkpoint_results.csv')
