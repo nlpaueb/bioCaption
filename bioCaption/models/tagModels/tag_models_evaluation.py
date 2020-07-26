@@ -1,4 +1,3 @@
-import os
 import sys
 import json
 from sklearn.metrics import f1_score
@@ -52,7 +51,8 @@ class TagsEvaluation:
                 gt_concepts = []
 
             if len(candidate_concepts) != 0:
-                candidate_concepts = candidate_concepts.split(';')
+                if not isinstance(candidate_concepts, list):
+                    candidate_concepts = candidate_concepts.split(';')
             else:
                 candidate_concepts = []
 
@@ -92,7 +92,3 @@ class TagsEvaluation:
 
                 mean_f1_score = current_score / max_score
         return mean_f1_score
-
-
-f1 = TagsEvaluation(gold_dir='/home/mary/Documents/Projects/bioCaption/iu_xray/tags.json', results_dir='/home/mary/Documents/Projects/bioCaption/results_knn.json')
-f1.evaluate_f1()

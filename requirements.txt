@@ -29,4 +29,4 @@ urllib3==1.24.3
 img2vec_pytorch
 pycocotools-fix
 tensorflow
-keras==2.2.3
+keras
