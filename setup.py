@@ -9,7 +9,7 @@ with open(path.join(here, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 setup(
       name='bioCaption',  # Required
-      version='1.0.2',
+      version='1.1.0',
       description='Diagnostic Captioning',
       url='https://github.com/nlpaueb/dc',
       author='nlpaueb',
