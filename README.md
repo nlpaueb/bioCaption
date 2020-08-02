@@ -165,11 +165,9 @@ into an image's folder.
 
 #### Combining multiple chexnet models.
 
-You can train multiple chexnet models and then combine them during testing with "chexnet_ensemple" function.
-You need to have a directory with two folders. One which contains the model checkpoints that you saved during
-training and one with the concept files (one for each checkpoint). 
-Each checkpoint should should be named as `[nameCheckpoint1]_tagCXN_checkpoint.hdf5` and its corresponding file with
-concepts should be named as `[nameCheckpoint1]_concepts.txt`
+You can train multiple chexnet models and then combine their decisions during testing with the "chexnet_ensemple" function.
+To use it, you need to have all the checkpoints (*.hdf5 files) in a directory alongside another one with the concept .txt files (one for each checkpoint). 
+Each checkpoint should be named as `[nameCheckpoint1]_tagCXN_checkpoint.hdf5` and its corresponging concept file should be named as `[nameCheckpoint1]_concepts.txt`
 
 ```python
 from bioCaption.models.tagModels.chexnet import Chexnet
