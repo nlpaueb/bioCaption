@@ -162,3 +162,38 @@ into an image's folder.
   "imgid3": ["tag1"]
 }
 ```
+
+#### Combining multiple chexnet models.
+
+You can train multiple chexnet models and then combine them during testing with "chexnet_ensemple" function.
+You need to have a directory with two folders. One which contains the model checkpoints that you saved during
+training and one with the concept files (one for each checkpoint). 
+Each checkpoint should should be named as `[nameCheckpoint1]_tagCXN_checkpoint.hdf5` and its corresponding file with
+concepts should be named as `[nameCheckpoint1]_concepts.txt`
+
+```python
+from bioCaption.models.tagModels.chexnet import Chexnet
+
+"""
+Note the split ratio in the constructor below.
+Since we don't want to train a model anymore, rather than only use the chexnet_ensemble,
+we want all the data that we load to be used as test. There's no need to assign part
+ of the data for training or validation in this case.
+"""
+chexnet = Chexnet('data/tags.json',
+                  'data/images/',
+                  'results_dir',
+                  batch_size=30,
+                  split_ratio=[0.0, 0.0, 1.0])
+
+# Dictionary which contains the decision threshold for each checkpoint.
+# It can be left None, then function is using the thresholds for the ImageCLEF 2020 checkpoints.
+checkpoints_threshold = {
+    "nameCheckpoint1": 0.34,
+    "nameCheckpoint2": 0.7,
+    "nameCheckpoint3": 0.14
+}
+
+chexnet.chexnet_ensemple("data/checkpoints", "data/concepts",
+ checkpoints_threshold = checkpoints_threshold, detailed_results=True)
+```

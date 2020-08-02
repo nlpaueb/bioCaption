@@ -11,7 +11,6 @@ from keras.initializers import glorot_uniform
 from keras.layers import Dense
 from keras.models import Model
 from keras.preprocessing import image
-from functools import reduce
 from tqdm import tqdm
 
 from bioCaption.models.tagModels.tag_models_evaluation import TagsEvaluation
@@ -259,44 +258,44 @@ class Chexnet:
                 json.dump(results_json, json_file)
         return img_ids, results_concepts
     
-    def chexnet_ensemple(self, checkpoints_directory, concepts_directory, detailed_results=True):
-        checkpoints_threshold = {
-            "1_DRAN": 0.34,
-            "2_DRAN": 0.7,
-            "1_DRCO": 0.14,
-            "2_DRCO": 0.08,
-            "1_DRCT": 0.73,
-            "2_DRCT": 0.5,
-            "1_DRMR": 0.28,
-            "2_DRMR": 0.98,
-            "1_DRPE": 0.3,
-            "2_DRPE": 0.23,
-            "1_DRUS": 0.18,
-            "2_DRUS": 0.22,
-            "1_DRXR": 0.45,
-            "2_DRXR": 0.86
-        }
-
+    def chexnet_ensemple(self, checkpoints_directory, concepts_directory, checkpoints_threshold=None,
+                         detailed_results=True):
+        """
+        :param checkpoints_directory: Directory with chexnet model checkpoints.
+        :param concepts_directory: : Directory with concepts files for each checkpoint.
+        :param checkpoints_threshold: Dictionary with the decition threshold for each dictionary.
+        :param detailed_results: If True the final csv will contain results for each checkpoint else
+        only the intersection of results for each image is being written..
+        """
+        if checkpoints_threshold is None:
+            checkpoints_threshold = {
+                "1_DRAN": 0.34,
+                "2_DRAN": 0.7,
+                "1_DRCO": 0.14,
+                "2_DRCO": 0.08,
+                "1_DRCT": 0.73,
+                "2_DRCT": 0.5,
+                "1_DRMR": 0.28,
+                "2_DRMR": 0.98,
+                "1_DRPE": 0.3,
+                "2_DRPE": 0.23,
+                "1_DRUS": 0.18,
+                "2_DRUS": 0.22,
+                "1_DRXR": 0.45,
+                "2_DRXR": 0.86
+            }
         ensemble_models_results = {}
         checkpoints = os.listdir(checkpoints_directory)
-        i = 0
         for checkpoint in checkpoints:
             model_path = os.path.join(checkpoints_directory, checkpoint)
             threshold = checkpoints_threshold[checkpoint.replace("_tagCXN_checkpoint.hdf5", "")]
             concepts_path = os.path.join(concepts_directory, checkpoint.replace("_tagCXN_checkpoint.hdf5", "_concepts.txt"))
             img_ids, results = self.chexnet_test(decision_threshold=threshold, model_path=model_path, concepts_path=concepts_path)
             ensemble_models_results[checkpoint] = results
-            i = i+1
-            if i == 2:
-                break
         df = pd.DataFrame.from_dict(ensemble_models_results)
-        df['intesection'] = df[df.columns].apply(lambda x: list(set.intersection(*map(set, list(x)))), axis=1)
-        df["images"] = img_ids
-        df.to_csv('checkpoint_results.csv')
-
-chexnet = Chexnet('iu_xray/iu_xray_auto_tags.json',
-                  'iu_xray/iu_xray_images/',
-                  'results_tag',
-                  batch_size=30,
-                   split_ratio = [0.6, 0.3, 0.1])
-chexnet.chexnet_ensemple("data/checks", "data/conc")
+        df['models_intesection'] = df[df.columns].apply(lambda x: list(set.intersection(*map(set, list(x)))), axis=1)
+        df.insert(0, 'image_ids', img_ids)
+        if detailed_results:
+            df.to_csv('chexnet_results_detailed.csv')
+        else:
+            df[["image_ids", "models_intesection"]].to_csv('chexnet_results.csv')
