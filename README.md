@@ -35,11 +35,16 @@ This baseline uses the most frequent words in the training set to form a caption
 
 #### References
 V. Kougia, J. Pavlopoulos and I. Androutsopoulos, "A Survey on Biomedical Image Captioning". Proceedings of the Workshop on Shortcomings in Vision and Language of the Annual Conference of the North American Chapter of the Association for Computational Linguistics (NAACL-HLT 2019), Minneapolis, USA, pp. 26-36, 2019.
+
 V. Kougia, J. Pavlopoulos and I. Androutsopoulos, "AUEB NLP Group at ImageCLEFmed Caption 2019". Working Notes of the Conference and Labs of the Evaluation Forum (CLEF 2019), Lugano, Switzerland, 2019.
- V. Kougia, J. Pavlopoulos and I. Androutsopoulos, "Medical Image Tagging by Deep Learning and Retrieval". Experimental IR Meets Multilinguality, Multimodality, and Interaction
+
+V. Kougia, J. Pavlopoulos and I. Androutsopoulos, "Medical Image Tagging by Deep Learning and Retrieval". Experimental IR Meets Multilinguality, Multimodality, and Interaction
 Proceedings of the Eleventh International Conference of the CLEF Association (CLEF 2020), Thessaloniki, Greece, 2020.
+
 B. Karatzas, J. Pavlopoulos, V. Kougia and I. Androutsopoulos, "AUEB NLP Group at ImageCLEFmed Caption 2020". Working Notes of the Conference and Labs of the Evaluation Forum (CLEF 2020), Thessaloniki, Greece, 2020.
+
 B. Jing,  P. Xie, E. Xing, “On the Automatic Generation of Medical Imaging Reports”. Proceedings of the 56th Annual Meeting of the Association for Computational Linguistics(Long Papers), Melbourne, Australia, pp. 2577–2586, 2018.
+
 D. Demner-Fushman, M. D. Kohli, M. B. Rosenman,S. E. Shooshan, L. Rodriguez, S. Antani, G. R.Thoma, and C. J. McDonald, “Preparing a collection of radiology examinations for distribution and retrieval”. Journal of the American Medical Informatics Association, 23(2):304–310, 2015.
 <br><br><br>
 # Practical Guide
