@@ -173,6 +173,8 @@ You can train multiple chexnet models and then combine their decisions during te
 To use it, you need to have all the checkpoints (*.hdf5 files) in a directory alongside another directory which will contain the text files with the concepts (one for each checkpoint). 
 Each checkpoint should be named as `[nameCheckpoint1]_tagCXN_checkpoint.hdf5` and its corresponging concept file should be named as `[nameCheckpoint1]_concepts.txt`
 
+You can download the checkpoints and concepts from [here](https://archive.org/details/2-drxr-chexnet-checkpoint).
+
 ```python
 from bioCaption.models.tagModels.chexnet import Chexnet
 
@@ -198,4 +200,5 @@ checkpoints_threshold = {
 
 chexnet.chexnet_ensemple("data/checkpoints", "data/concepts",
  checkpoints_threshold = checkpoints_threshold, detailed_results=True)
+ 
 ```
