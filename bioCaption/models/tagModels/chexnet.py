@@ -263,7 +263,7 @@ class Chexnet:
         """
         :param checkpoints_directory: Directory with chexnet model checkpoints.
         :param concepts_directory: : Directory with concepts files for each checkpoint.
-        :param checkpoints_threshold: Dictionary with the decition threshold for each dictionary.
+        :param checkpoints_threshold: Dictionary with the decision threshold for each dictionary.
         :param detailed_results: If True the final csv will contain results for each checkpoint else
         only the intersection of results for each image is being written..
         """
@@ -277,12 +277,12 @@ class Chexnet:
                 "2_DRCT": 0.5,
                 "1_DRMR": 0.28,
                 "2_DRMR": 0.98,
-                "1_DRPE": 0.3,
-                "2_DRPE": 0.23,
+                "1_DRPE": 0.31,
+                "2_DRPE": 0.30,
                 "1_DRUS": 0.18,
                 "2_DRUS": 0.22,
-                "1_DRXR": 0.45,
-                "2_DRXR": 0.86
+                "1_DRXR": 0.85,
+                "2_DRXR": 0.36
             }
         ensemble_models_results = {}
         checkpoints = os.listdir(checkpoints_directory)
