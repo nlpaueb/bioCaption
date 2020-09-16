@@ -1,5 +1,8 @@
 # bioCaption - Diagnostic Captioning
 
+The datasets and captioning models are described in detail in ‘A Survey on Biomedical Image Captioning’.
+The tagging models were used for the participation of AUEB NLP Group in the ImageCLEFmed 2019 Concept Detection task, where they achieved the best performance. More detail can be found in the systems description paper and in the Best of Labs track for the 2019 ImageCLEF Concept Detection task of the 2020 CLEF conference proceeding (Kougia et al. 2020).
+In the ImageCLEFmed 2020 Concept Detection task, AUEB NLP Group achieved again the best performance and was ranked 1st, 2nd and 6th. We provide the pretrained tagging systems that were ranked first, so they can be downloaded and used for medical image tagging. More details about these systems can be found in the systems description paper (Karatzas et al., 2020).
 # Datasets
 
 We provide scripts for downloading IU X-ray and Peir Gross. Both datasets can be used for captioning, while IU X-ray can also be used for tagging.
@@ -30,18 +33,14 @@ This baseline uses the most frequent words in the training set to form a caption
 #### Nearest Neighbour Baseline (1-NN)
 1-NN uses cosine similarity to find the training image that is the most similar to a test image and assigns the retrieved training caption to the test image. The images are encoded by a CNN and their image embedding extracted from a layer of the encoder is used.
 
-
-___The datasets and captioning models are described in detail in "A Survey on Biomedical Image Captioning". The tagging models were used for the participation of AUEB NLP Group in the ImageCLEFmed 2019 Concept Prediction task, where they achieved the best performance. More detail can be found in the systems description paper.___
-
 #### References
-
 V. Kougia, J. Pavlopoulos and I. Androutsopoulos, "A Survey on Biomedical Image Captioning". Proceedings of the Workshop on Shortcomings in Vision and Language of the Annual Conference of the North American Chapter of the Association for Computational Linguistics (NAACL-HLT 2019), Minneapolis, USA, pp. 26-36, 2019.
-
 V. Kougia, J. Pavlopoulos and I. Androutsopoulos, "AUEB NLP Group at ImageCLEFmed Caption 2019". Working Notes of the Conference and Labs of the Evaluation Forum (CLEF 2019), Lugano, Switzerland, 2019.
-
+ V. Kougia, J. Pavlopoulos and I. Androutsopoulos, "Medical Image Tagging by Deep Learning and Retrieval". Experimental IR Meets Multilinguality, Multimodality, and Interaction
+Proceedings of the Eleventh International Conference of the CLEF Association (CLEF 2020), Thessaloniki, Greece, 2020.
+B. Karatzas, J. Pavlopoulos, V. Kougia and I. Androutsopoulos, "AUEB NLP Group at ImageCLEFmed Caption 2020". Working Notes of the Conference and Labs of the Evaluation Forum (CLEF 2020), Thessaloniki, Greece, 2020.
 B. Jing,  P. Xie, E. Xing, “On the Automatic Generation of Medical Imaging Reports”. Proceedings of the 56th Annual Meeting of the Association for Computational Linguistics(Long Papers), Melbourne, Australia, pp. 2577–2586, 2018.
-
-D. Demner-Fushman, M. D. Kohli, M. B. Rosenman,S. E. Shooshan, L. Rodriguez, S. Antani, G. R.Thoma, and C. J. McDonald, “Preparing a collection of radiology examinations for distribution and retrieval”. Journal of the American Medical In-formatics Association, 23(2):304–310, 2015.
+D. Demner-Fushman, M. D. Kohli, M. B. Rosenman,S. E. Shooshan, L. Rodriguez, S. Antani, G. R.Thoma, and C. J. McDonald, “Preparing a collection of radiology examinations for distribution and retrieval”. Journal of the American Medical Informatics Association, 23(2):304–310, 2015.
 <br><br><br>
 # Practical Guide
 ### Install
