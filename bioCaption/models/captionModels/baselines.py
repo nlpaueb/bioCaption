@@ -108,7 +108,7 @@ class Baselines:
 
         # Normalize image vectors to avoid normalized cosine and use dot
         l2 = lambda x: np.sqrt(np.sum(x*x,1))
-        raw = raw / np.array([l2(raw) * raw.shape[1]).transpose()
+        raw = raw / np.array([l2(raw)] * raw.shape[1]).transpose()
         sim_test_results = {}
 
         for test_image_ids in tqdm(test_data.img_ids_list):
