@@ -107,7 +107,8 @@ class Baselines:
         raw = np.array([train_images_vec[i] for i in train_images_vec])
 
         # Normalize image vectors to avoid normalized cosine and use dot
-        raw = raw / np.array([np.sum(raw, 1)] * raw.shape[1]).transpose()
+        l2 = lambda x: np.sqrt(np.sum(x*x,1))
+        raw = raw / np.array([l2(raw)] * raw.shape[1]).transpose()
         sim_test_results = {}
 
         for test_image_ids in tqdm(test_data.img_ids_list):
@@ -117,7 +118,7 @@ class Baselines:
                 test_vectors.append(self.image_to_vector(img2vec, test_image))
             vector = vector_function(np.array(test_vectors))
             # Compute cosine similarity with every train image
-            vector = vector / np.sum(vector)
+            vector = vector / l2(np.array([vector]))
             # Clone to do efficient mat mul dot
             test_mat = np.array([vector] * raw.shape[0])
             sims = np.sum(test_mat * raw, 1)
